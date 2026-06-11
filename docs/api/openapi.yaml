@@ -1,0 +1,650 @@
+﻿openapi: 3.0.3
+info:
+  title: Smart Tool Cabinet API
+
+servers:
+  - url: http://localhost:8080
+
+tags:
+  - name: Device Auth
+  - name: Device Access
+  - name: Device Snapshot
+  - name: Device Event
+  - name: Operator
+  - name: Supervisor
+  - name: Admin
+
+paths:
+  /api/device/auth:
+    post:
+      tags: [Device Auth]
+      summary: Autenticar dispositivo
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceAuthRequest'
+      responses:
+        '200':
+          description: Dispositivo autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceAuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/device/operator-auth:
+    post:
+      tags: [Device Auth]
+      summary: Autenticar operador por PIN/NFC
+      security:
+        - bearerDeviceAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OperatorAuthRequest'
+      responses:
+        '200':
+          description: Operador autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperatorAuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/device/cabinet-accesses:
+    post:
+      tags: [Device Access]
+      summary: Abrir CabinetAccess
+      security:
+        - bearerDeviceAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpenCabinetAccessRequest'
+      responses:
+        '201':
+          description: CabinetAccess aberto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OpenCabinetAccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/device/cabinet-accesses/{cabinetAccessId}/snapshots:
+    post:
+      tags: [Device Snapshot]
+      summary: Submeter snapshot BEFORE/AFTER
+      security:
+        - bearerDeviceAuth: []
+      parameters:
+        - in: path
+          name: cabinetAccessId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSnapshotRequest'
+      responses:
+        '201':
+          description: Snapshot registado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateSnapshotResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/device/cabinet-events:
+    post:
+      tags: [Device Event]
+      summary: Registar evento do armário
+      security:
+        - bearerDeviceAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterCabinetEventRequest'
+      responses:
+        '201':
+          description: Evento registado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterCabinetEventResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/device/cabinet-accesses/{cabinetAccessId}/close:
+    post:
+      tags: [Device Access]
+      summary: Fechar CabinetAccess e devolver resultado operacional
+      description: |
+        O fecho físico ocorre sempre.
+        O resultado operacional reflete apenas se as ferramentas foram devolvidas ou não devolvidas.
+      security:
+        - bearerDeviceAuth: []
+      parameters:
+        - in: path
+          name: cabinetAccessId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: CabinetAccess fechado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CloseCabinetAccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/operators/{operatorId}/tool-assignments:
+    get:
+      tags: [Operator]
+      summary: Consultar atribuições de ferramenta por operador
+      security:
+        - bearerOperatorAuth: []
+        - bearerSupervisorAuth: []
+        - bearerAdminAuth: []
+      parameters:
+        - in: path
+          name: operatorId
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: status
+          required: false
+          schema:
+            type: string
+            enum: [ACTIVE, RETURNED, PENDING_REVIEW, RESOLVED]
+      responses:
+        '200':
+          description: Lista de atribuições
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OperatorToolAssignmentsResponse'
+
+  /api/operators/{operatorId}/end-of-day-check:
+    get:
+      tags: [Operator]
+      summary: Validar pendências de fim do dia
+      security:
+        - bearerOperatorAuth: []
+        - bearerSupervisorAuth: []
+        - bearerAdminAuth: []
+      description: |
+        Avalia estado final de custódia por operador.
+        Se houver pendências, requer revisão de supervisor.
+      parameters:
+        - in: path
+          name: operatorId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Resultado do end-of-day check
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EndOfDayCheckResponse'
+
+  /api/supervisor/resolutions:
+    post:
+      tags: [Supervisor]
+      summary: Registar resolução formal de supervisor
+      security:
+        - bearerSupervisorAuth: []
+        - bearerAdminAuth: []
+      description: |
+        Resolução humana obrigatória para pendências/discrepâncias.
+        O sistema não diagnostica causa automaticamente.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSupervisorResolutionRequest'
+      responses:
+        '201':
+          description: Resolução criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateSupervisorResolutionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    get:
+      tags: [Supervisor]
+      summary: Consultar resoluções de supervisor
+      security:
+        - bearerSupervisorAuth: []
+        - bearerAdminAuth: []
+      parameters:
+        - in: query
+          name: operatorId
+          required: false
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista de resoluções
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupervisorResolutionListResponse'
+
+  /api/admin/cabinets:
+    post:
+      tags: [Admin]
+      summary: Criar armário (suporte técnico)
+      security:
+        - bearerAdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminCabinetCreateRequest'
+      responses:
+        '201':
+          description: Armário criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCreatedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/admin/tools:
+    post:
+      tags: [Admin]
+      summary: Criar ferramenta (suporte técnico)
+      security:
+        - bearerAdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminToolCreateRequest'
+      responses:
+        '201':
+          description: Ferramenta criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCreatedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/admin/users:
+    post:
+      tags: [Admin]
+      summary: Criar utilizador (suporte técnico)
+      security:
+        - bearerAdminAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUserCreateRequest'
+      responses:
+        '201':
+          description: Utilizador criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminCreatedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+  securitySchemes:
+    bearerDeviceAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token Bearer de dispositivo (ambiente académico pode usar token estático)
+    bearerOperatorAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token Bearer de operador
+    bearerSupervisorAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token Bearer de supervisor
+    bearerAdminAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token Bearer de administrador
+
+  responses:
+    BadRequest:
+      description: Pedido inválido
+    Unauthorized:
+      description: Não autenticado
+    Conflict:
+      description: Conflito de estado
+
+  schemas:
+    AdminCreatedResponse:
+      type: object
+      additionalProperties:
+        type: string
+
+    AdminCabinetCreateRequest:
+      type: object
+      required: [code, name]
+      properties:
+        code: { type: string }
+        name: { type: string }
+        location: { type: string }
+
+    AdminToolCreateRequest:
+      type: object
+      required: [cabinetId, tagCode, displayName, typeCode]
+      properties:
+        cabinetId: { type: string, format: uuid }
+        tagCode: { type: string }
+        displayName: { type: string }
+        typeCode: { type: integer, format: int32 }
+        serialNumber: { type: string, nullable: true }
+
+    AdminUserCreateRequest:
+      type: object
+      required: [username, role]
+      properties:
+        username: { type: string }
+        fullName: { type: string, nullable: true }
+        role: { type: string, enum: [OPERATOR, SUPERVISOR, ADMIN] }
+        pin: { type: string, nullable: true }
+        nfcUid: { type: string, nullable: true }
+
+    DeviceAuthRequest:
+      type: object
+      required: [cabinetCode, apiKey]
+      properties:
+        cabinetCode: { type: string }
+        apiKey: { type: string }
+      example:
+        cabinetCode: CAB-001
+        apiKey: DEVKEY-CAB-001
+
+    DeviceAuthResponse:
+      type: object
+      required: [deviceToken, expiresAt]
+      properties:
+        deviceToken: { type: string }
+        expiresAt: { type: string, format: date-time }
+      example:
+        deviceToken: DEVICE-TOKEN-1
+        expiresAt: 2026-04-16T18:30:00Z
+
+    OperatorAuthRequest:
+      type: object
+      required: [cabinetCode, method, credential]
+      properties:
+        cabinetCode: { type: string }
+        method: { type: string, enum: [PIN, NFC] }
+        credential: { type: string }
+
+    OperatorAuthResponse:
+      type: object
+      required: [operatorId, status]
+      properties:
+        operatorId: { type: string, format: uuid }
+        status: { type: string, example: AUTHENTICATED }
+
+    OpenCabinetAccessRequest:
+      type: object
+      required: [cabinetCode, operatorId]
+      properties:
+        cabinetCode: { type: string }
+        operatorId: { type: string, format: uuid }
+      example:
+        cabinetCode: CAB-001
+        operatorId: 11111111-1111-1111-1111-111111111111
+
+    OpenCabinetAccessResponse:
+      type: object
+      required: [cabinetAccessId, status, openedAt]
+      properties:
+        cabinetAccessId: { type: string, format: uuid }
+        status: { type: string, enum: [OPEN, CLOSED] }
+        openedAt: { type: string, format: date-time }
+
+    CreateSnapshotRequest:
+      type: object
+      required: [snapshotType, capturedAt, source, observedTags]
+      properties:
+        snapshotType: { type: string, enum: [BEFORE, AFTER, EXTRA] }
+        capturedAt: { type: string, format: date-time }
+        source: { type: string }
+        observedTags:
+          type: array
+          items: { type: string }
+      example:
+        snapshotType: BEFORE
+        capturedAt: 2026-04-16T09:00:00Z
+        source: RFID_READER
+        observedTags: [TAG-1001, TAG-1002]
+
+    CreateSnapshotResponse:
+      type: object
+      properties:
+        snapshotId: { type: string, format: uuid }
+        recognizedTags:
+          type: array
+          items: { type: string }
+        unknownTags:
+          type: array
+          items: { type: string }
+
+    RegisterCabinetEventRequest:
+      type: object
+      required: [cabinetAccessId, eventType, occurredAt]
+      properties:
+        cabinetAccessId: { type: string, format: uuid }
+        eventType: { type: string }
+        payload: { type: object, additionalProperties: true }
+        occurredAt: { type: string, format: date-time }
+
+    RegisterCabinetEventResponse:
+      type: object
+      properties:
+        eventId: { type: string, format: uuid }
+        status: { type: string, example: REGISTERED }
+
+    CloseCabinetAccessResponse:
+      type: object
+      required:
+        [cabinetAccessId, status, closedAt, operationalResult, assignmentsCreatedCount, assignmentsReturnedCount, unknownTagsCount, discrepancyFlag]
+      properties:
+        cabinetAccessId: { type: string, format: uuid }
+        status: { type: string, enum: [CLOSED] }
+        closedAt: { type: string, format: date-time }
+        operationalResult:
+          type: string
+          enum:
+            - CLOSED_OK
+            - CLOSED_WITH_ASSIGNMENTS
+            - CLOSED_WITH_UNKNOWN_TAGS
+            - CLOSED_WITH_DISCREPANCY
+        assignmentsCreatedCount: { type: integer, format: int32 }
+        assignmentsReturnedCount: { type: integer, format: int32 }
+        unknownTagsCount: { type: integer, format: int32 }
+        discrepancyFlag: { type: boolean }
+      example:
+        cabinetAccessId: 22222222-2222-2222-2222-222222222222
+        status: CLOSED
+        closedAt: 2026-04-16T09:05:00Z
+        operationalResult: CLOSED_WITH_ASSIGNMENTS
+        assignmentsCreatedCount: 2
+        assignmentsReturnedCount: 0
+        unknownTagsCount: 0
+        discrepancyFlag: false
+
+    ToolAssignmentItem:
+      type: object
+      required: [assignmentId, toolId, tagCode, assignedAt, status]
+      description: |
+        Item de custódia por operador.
+        O estado de custódia é avaliado por `status` (ACTIVE, RETURNED, PENDING_REVIEW, RESOLVED).
+        `originCabinetCode` é apenas contexto técnico de rastreabilidade.
+      properties:
+        assignmentId: { type: string, format: uuid }
+        toolId: { type: string, format: uuid }
+        tagCode: { type: string }
+        toolDisplayName: { type: string }
+        originCabinetCode: { type: string }
+        assignedAt: { type: string, format: date-time }
+        returnedAt: { type: string, format: date-time, nullable: true }
+        status:
+          type: string
+          enum: [ACTIVE, RETURNED, PENDING_REVIEW, RESOLVED]
+
+    OperatorToolAssignmentsResponse:
+      type: object
+      properties:
+        operatorId: { type: string, format: uuid }
+        assignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ToolAssignmentItem'
+
+    EndOfDayCheckResponse:
+      type: object
+      required: [operatorId, pendingAssignments, pendingAssignmentsCount, requireSupervisorReview, allowExit]
+      description: |
+        O sistema deteta apenas estado operacional de custódia.
+        A causa da pendência/discrepância é investigada e classificada pelo supervisor.
+      properties:
+        operatorId: { type: string, format: uuid }
+        pendingAssignments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ToolAssignmentItem'
+        pendingAssignmentsCount: { type: integer, format: int32 }
+        requireSupervisorReview: { type: boolean }
+        allowExit: { type: boolean }
+      example:
+        operatorId: 11111111-1111-1111-1111-111111111111
+        pendingAssignments:
+          - assignmentId: 33333333-3333-3333-3333-333333333333
+            toolId: 44444444-4444-4444-4444-444444444444
+            tagCode: TAG-1001
+            toolDisplayName: Chave dinamométrica
+            originCabinetCode: CAB-001
+            assignedAt: 2026-04-16T09:03:00Z
+            returnedAt: null
+            status: ACTIVE
+        pendingAssignmentsCount: 1
+        requireSupervisorReview: true
+        allowExit: false
+
+    CreateSupervisorResolutionRequest:
+      type: object
+      required: [operatorId, supervisorId, reasonCode, reportText, allowExit, assignmentIds, decisionAt]
+      description: |
+        Decisão humana formal do supervisor.
+        O sistema não infere causa automaticamente.
+      properties:
+        operatorId: { type: string, format: uuid }
+        supervisorId: { type: string, format: uuid }
+        reasonCode: { type: string }
+        reportText: { type: string }
+        decisionAt: { type: string, format: date-time }
+        allowExit: { type: boolean }
+        assignmentIds:
+          type: array
+          minItems: 1
+          items: { type: string, format: uuid }
+      example:
+        operatorId: 11111111-1111-1111-1111-111111111111
+        supervisorId: 55555555-5555-5555-5555-555555555555
+        reasonCode: TOOL_NOT_RETURNED
+        reportText: Ferramenta não devolvida no final do turno; ocorrência registada para tratamento interno.
+        decisionAt: 2026-04-16T18:10:00Z
+        allowExit: true
+        assignmentIds: [33333333-3333-3333-3333-333333333333]
+
+    CreateSupervisorResolutionResponse:
+      type: object
+      required: [resolutionId, operatorId, supervisorId, decisionAt, reasonCode, reportText, allowExit, resolvedAssignmentIds]
+      properties:
+        resolutionId: { type: string, format: uuid }
+        operatorId: { type: string, format: uuid }
+        supervisorId: { type: string, format: uuid }
+        decisionAt: { type: string, format: date-time }
+        reasonCode: { type: string }
+        reportText: { type: string }
+        allowExit: { type: boolean }
+        resolvedAssignmentIds:
+          type: array
+          items: { type: string, format: uuid }
+
+    SupervisorResolutionListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CreateSupervisorResolutionResponse'
+
+
+

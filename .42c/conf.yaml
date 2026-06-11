@@ -1,0 +1,3 @@
+apis:
+  docs/api/openapi.yaml:
+    alias: "smart-tool-custody-api"

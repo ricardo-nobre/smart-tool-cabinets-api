@@ -1,0 +1,50 @@
+﻿# Java / Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+logs/
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment / secrets
+.env
+.env.*
+application-local.yml
+application-local.properties
+application-dev-local.yml
+application-dev-local.properties
+
+# Database / runtime files
+*.db
+*.sqlite
+*.sqlite3
+data/
+postgres-data/
+
+# Docker overrides
+docker-compose.override.yml
+
+# Temporary files
+tmp/
+temp/
+*.bak
+*.swp
+
+# Generated files
+backend/target/
+simulator/target/

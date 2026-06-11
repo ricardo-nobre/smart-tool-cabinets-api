@@ -1,0 +1,787 @@
+{
+	"version": "2.0.0",
+	"runtimeConfiguration": {
+		"environment": "default",
+		"laxTestingModeEnabled": false,
+		"apiConnectivityCheck": true,
+		"logLevel": "error",
+		"logDestination": "stdout+platform",
+		"logMaxFileSize": 2147483648,
+		"requestHeaderNameRequestId": "x-scan-request-id",
+		"requestHeaderNameScenarioId": "x-scan-scenario-id",
+		"requestHeaderNameRequestType": "x-scan-request-type",
+		"requestFlowrate": 100,
+		"requestTimeout": 30,
+		"requestTlsInsecureSkipVerify": true,
+		"responseFollowRedirection": false,
+		"responseMaxBodySizeScan": 10485760,
+		"happyPathOnly": false,
+		"maxRequestRetryAttempts": 5,
+		"maxScanDuration": 1800,
+		"memoryLimit": 2147483648,
+		"memoryTimeSpan": 10,
+		"reportMaxRequestSizeHappyPath": 8092,
+		"reportMaxRequestSizeTest": 8092,
+		"reportIncludeRequestBody": true,
+		"reportIncludeResponseBody": true,
+		"reportMaxHttpResponseSizeHappyPath": 8092,
+		"reportMaxBodySizeHappyPath": 8092,
+		"reportMaxHttpResponseSizeTest": 8092,
+		"reportMaxBodySizeTest": 8092,
+		"reportIssuesOnly": false,
+		"reportMaxIssues": 1000,
+		"reportMaxSize": 20971520,
+		"reportGenerateCurlCommand": true,
+		"normalizeServerUrls": true
+	},
+	"customizations": {
+		"happyPaths": {
+			"retry": 1,
+			"responsePolicy": {
+				"httpStatusExpected": true,
+				"mustBeConformant": true
+			},
+			"httpStatusExpected": [ "2XX", "404" ]
+		},
+		"tests": {
+			"responsePolicy": {
+				"httpStatusExpected": true,
+				"mustBeConformant": true
+			}
+		},
+		"requests": { }
+	},
+	"environments": {
+		"default": {
+			"variables": {
+				"bearerAdminAuth": {
+					"name": "SCAN42C_SECURITY_BEARERADMINAUTH",
+					"from": "environment",
+					"required": true
+				},
+				"bearerDeviceAuth": {
+					"name": "SCAN42C_SECURITY_BEARERDEVICEAUTH",
+					"from": "environment",
+					"required": true
+				},
+				"bearerOperatorAuth": {
+					"name": "SCAN42C_SECURITY_BEAREROPERATORAUTH",
+					"from": "environment",
+					"required": true
+				},
+				"bearerSupervisorAuth": {
+					"name": "SCAN42C_SECURITY_BEARERSUPERVISORAUTH",
+					"from": "environment",
+					"required": true
+				},
+				"host": {
+					"name": "SCAN42C_HOST",
+					"from": "environment",
+					"required": true,
+					"default": "http://localhost:8080"
+				}
+			}
+		}
+	},
+	"operations": {
+		"/api/admin/cabinets:post": {
+			"operationId": "/api/admin/cabinets:post",
+			"request": {
+				"operationId": "/api/admin/cabinets:post",
+				"auth": [ "bearerAdminAuth" ],
+				"request": {
+					"type": "42c",
+					"details": {
+						"operationId": "/api/admin/cabinets:post",
+						"method": "POST",
+						"url": "{{host}}/api/admin/cabinets",
+						"headers": [ {
+							"key": "Content-Type",
+							"value": "application/json"
+						} ],
+						"requestBody": {
+							"mode": "json",
+							"json": {
+								"code": "ebxqqvevhnvizityneweppoqkryccvrn",
+								"location": "cpkhbsruavqrnjqtqyemnpeipyhlzlis",
+								"name": "cylnhhvwxnqmelpsnxlllatumoqnracu"
+							}
+						}
+					}
+				},
+				"defaultResponse": "201",
+				"responses": {
+					"201": {
+						"expectations": {
+							"httpStatus": 201
+						}
+					},
+					"400": {
+						"expectations": {
+							"httpStatus": 400
+						}
+					},
+					"401": {
+						"expectations": {
+							"httpStatus": 401
+						}
+					}
+				}
+			},
+			"scenarios": [ {
+				"key": "happy.path",
+				"requests": [ {
+					"fuzzing": true,
+					"$ref": "#/operations/~1api~1admin~1cabinets:post/request"
+				} ],
+				"fuzzing": true
+			} ]
+		},
+		"/api/admin/tools:post": {
+			"operationId": "/api/admin/tools:post",
+			"request": {
+				"operationId": "/api/admin/tools:post",
+				"auth": [ "bearerAdminAuth" ],
+				"request": {
+					"type": "42c",
+					"details": {
+						"operationId": "/api/admin/tools:post",
+						"method": "POST",
+						"url": "{{host}}/api/admin/tools",
+						"headers": [ {
+							"key": "Content-Type",
+							"value": "application/json"
+						} ],
+						"requestBody": {
+							"mode": "json",
+							"json": {
+								"cabinetId": "wjboucbqljgmdlttsjzhdvqiaprsexzt",
+								"displayName": "fiiraoajbqkiugcygrblvtsbdhgnblkb",
+								"serialNumber": "acrvrmximklxznxglwoivkuyjzmddcep",
+								"tagCode": "wvkexhujuculdzbysrlfiyecdceqamwt",
+								"typeCode": 2988374261041065000
+							}
+						}
+					}
+				},
+				"defaultResponse": "201",
+				"responses": {
+					"201": {
+						"expectations": {
+							"httpStatus": 201
+						}
+					},
+					"400": {
+						"expectations": {
+							"httpStatus": 400
+						}
+					},
+					"401": {
+						"expectations": {
+							"httpStatus": 401
+						}
+					}
+				}
+			},
+			"scenarios": [ {
+				"key": "happy.path",
+				"requests": [ {
+					"fuzzing": true,
+					"$ref": "#/operations/~1api~1admin~1tools:post/request"
+				} ],
+				"fuzzing": true
+			} ]
+		},
+		"/api/admin/users:post": {
+			"operationId": "/api/admin/users:post",
+			"request": {
+				"operationId": "/api/admin/users:post",
+				"auth": [ "bearerAdminAuth" ],
+				"request": {
+					"type": "42c",
+					"details": {
+						"operationId": "/api/admin/users:post",
+						"method": "POST",
+						"url": "{{host}}/api/admin/users",
+						"headers": [ {
+							"key": "Content-Type",
+							"value": "application/json"
+						} ],
+						"requestBody": {
+							"mode": "json",
+							"json": {
+								"fullName": "utdchwvtgeywhcdykmbihtzkdlqcilhp",
+								"nfcUid": "bkppyegqqqrzozxzrricdyfjoqejyzox",
+								"pin": "apzipekzsggiyxwgxyhtjylhbwgdtuzo",
+								"role": "SUPERVISOR",
+								"username": "azemukjqkvbzzhobroyptpkxitnamdjw"
+							}
+						}
+					}
+				},
+				"defaultResponse": "201",
+				"responses": {
+					"201": {
+						"expectations": {
+							"httpStatus": 201
+						}
+					},
+					"400": {
+						"expectations": {
+							"httpStatus": 400
+						}
+					},
+					"401": {
+						"expectations": {
+							"httpStatus": 401
+						}
+					}
+				}
+			},
+			"scenarios": [ {
+				"key": "happy.path",
+				"requests": [ {
+					"fuzzing": true,
+					"$ref": "#/operations/~1api~1admin~1users:post/request"
+				} ],
+				"fuzzing": true
+			} ]
+		},
+		"/api/device/auth:post": {
+			"operationId": "/api/device/auth:post",
+			"request": {
+				"operationId": "/api/device/auth:post",
+				"request": {
+					"type": "42c",
+					"details": {
+						"operationId": "/api/device/auth:post",
+						"method": "POST",
+						"url": "{{host}}/api/device/auth",
+						"headers": [ {
+							"key": "Content-Type",
+							"value": "application/json"
+						} ],
+						"requestBody": {
+							"mode": "json",
+							"json": {
+								"apiKey": "DEVKEY-CAB-001",
+								"cabinetCode": "CAB-001"
+							}
+						}
+					}
+				},
+				"defaultResponse": "200",
+				"responses": {
+					"200": {
+						"expectations": {
+							"httpStatus": 200
+						}
+					},
+					"400": {
+						"expectations": {
+							"httpStatus": 400
+						}
+					},
+					"401": {
+						"expectations": {
+							"httpStatus": 401
+						}
+					}
+				}
+			},
+			"scenarios": [ {
+				"key": "happy.path",
+				"requests": [ {
+					"fuzzing": true,
+					"$ref": "#/operations/~1api~1device~1auth:post/request"
+				} ],
+				"fuzzing": true
+			} ]
+		},
+		"/api/device/cabinet-accesses/{cabinetAccessId}/close:post": {
+			"operationId": "/api/device/cabinet-accesses/{cabinetAccessId}/close:post",
+			"request": {
+				"operationId": "/api/device/cabinet-accesses/{cabinetAccessId}/close:post",
+				"auth": [ "bearerDeviceAuth" ],
+				"request": {
+					"type": "42c",
+					"details": {
+						"operationId": "/api/device/cabinet-accesses/{cabinetAccessId}/close:post",
+						"method": "POST",
+						"url": "{{host}}/api/device/cabinet-accesses/{cabinetAccessId}/close",
+						"paths": [ {
+							"key": "cabinetAccessId",
+							"value": "hdowepqsbdmpcwcthqbmlmowkfhnkbvn"
+						} ]
+					}
+				},
+				"defaultResponse": "200",
+				"responses": {
+					"200": {
+						"expectations": {
+							"httpStatus": 200
+						}
+					},
+					"400": {
+						"expectations": {
+							"httpStatus": 400
+						}
+					},
+					"401": {
+						"expectations": {
+							"httpStatus": 401
+						}
+					},
+					"409": {
+						"expectations": {
+							"httpStatus": 409
+						}
+					}
+				}
+			},
+			"scenarios": [ {
+				"key": "happy.path",
+				"requests": [ {
+					"fuzzing": true,
+					"$ref": "#/operations/~1api~1device~1cabinet-accesses~1{cabinetAccessId}~1close:post/request"
+				} ],
+				"fuzzing": true
+			} ]
+		},
+		"/api/device/cabinet-accesses/{cabinetAccessId}/snapshots:post": {
+			"operationId": "/api/device/cabinet-accesses/{cabinetAccessId}/snapshots:post",
+			"request": {
+				"operationId": "/api/device/cabinet-accesses/{cabinetAccessId}/snapshots:post",
+				"auth": [ "bearerDeviceAuth" ],
+				"request": {
+					"type": "42c",
+					"details": {
+						"operationId": "/api/device/cabinet-accesses/{cabinetAccessId}/snapshots:post",
+						"method": "POST",
+						"url": "{{host}}/api/device/cabinet-accesses/{cabinetAccessId}/snapshots",
+						"headers": [ {
+							"key": "Content-Type",
+							"value": "application/json"
+						} ],
+						"paths": [ {
+							"key": "cabinetAccessId",
+							"value": "hdhndfejidaedocyxaacokbvjyzkddhr"
+						} ],
+						"requestBody": {
+							"mode": "json",
+							"json": {
+								"capturedAt": "2026-04-16T09:00:00Z",
+								"observedTags": [ "TAG-1001", "TAG-1002" ],
+								"snapshotType": "BEFORE",
+								"source": "RFID_READER"
+							}
+						}
+					}
+				},
+				"defaultResponse": "201",
+				"responses": {
+					"201": {
+						"expectations": {
+							"httpStatus": 201
+						}
+					},
+					"400": {
+						"expectations": {
+							"httpStatus": 400
+						}
+					},
+					"401": {
+						"expectations": {
+							"httpStatus": 401
+						}
+					},
+					"409": {
+						"expectations": {
+							"httpStatus": 409
+						}
+					}
+				}
+			},
+			"scenarios": [ {
+				"key": "happy.path",
+				"requests": [ {
+					"fuzzing": true,
+					"$ref": "#/operations/~1api~1device~1cabinet-accesses~1{cabinetAccessId}~1snapshots:post/request"
+				} ],
+				"fuzzing": true
+			} ]
+		},
+		"/api/device/cabinet-accesses:post": {
+			"operationId": "/api/device/cabinet-accesses:post",
+			"request": {
+				"operationId": "/api/device/cabinet-accesses:post",
+				"auth": [ "bearerDeviceAuth" ],
+				"request": {
+					"type": "42c",
+					"details": {
+						"operationId": "/api/device/cabinet-accesses:post",
+						"method": "POST",
+						"url": "{{host}}/api/device/cabinet-accesses",
+						"headers": [ {
+							"key": "Content-Type",
+							"value": "application/json"
+						} ],
+						"requestBody": {
+							"mode": "json",
+							"json": {
+								"cabinetCode": "CAB-001",
+								"operatorId": "11111111-1111-1111-1111-111111111111"
+							}
+						}
+					}
+				},
+				"defaultResponse": "201",
+				"responses": {
+					"201": {
+						"expectations": {
+							"httpStatus": 201
+						}
+					},
+					"400": {
+						"expectations": {
+							"httpStatus": 400
+						}
+					},
+					"401": {
+						"expectations": {
+							"httpStatus": 401
+						}
+					},
+					"409": {
+						"expectations": {
+							"httpStatus": 409
+						}
+					}
+				}
+			},
+			"scenarios": [ {
+				"key": "happy.path",
+				"requests": [ {
+					"fuzzing": true,
+					"$ref": "#/operations/~1api~1device~1cabinet-accesses:post/request"
+				} ],
+				"fuzzing": true
+			} ]
+		},
+		"/api/device/cabinet-events:post": {
+			"operationId": "/api/device/cabinet-events:post",
+			"request": {
+				"operationId": "/api/device/cabinet-events:post",
+				"auth": [ "bearerDeviceAuth" ],
+				"request": {
+					"type": "42c",
+					"details": {
+						"operationId": "/api/device/cabinet-events:post",
+						"method": "POST",
+						"url": "{{host}}/api/device/cabinet-events",
+						"headers": [ {
+							"key": "Content-Type",
+							"value": "application/json"
+						} ],
+						"requestBody": {
+							"mode": "json",
+							"json": {
+								"cabinetAccessId": "vpdkndzemdudleouisybepeyrrfcaikk",
+								"eventType": "badbhfkepquhkpfkeyuosrbgwfvalgov",
+								"occurredAt": "cjjvusofvttffvscmjclpccowegbpcod",
+								"payload": { }
+							}
+						}
+					}
+				},
+				"defaultResponse": "201",
+				"responses": {
+					"201": {
+						"expectations": {
+							"httpStatus": 201
+						}
+					},
+					"400": {
+						"expectations": {
+							"httpStatus": 400
+						}
+					},
+					"401": {
+						"expectations": {
+							"httpStatus": 401
+						}
+					}
+				}
+			},
+			"scenarios": [ {
+				"key": "happy.path",
+				"requests": [ {
+					"fuzzing": true,
+					"$ref": "#/operations/~1api~1device~1cabinet-events:post/request"
+				} ],
+				"fuzzing": true
+			} ]
+		},
+		"/api/device/operator-auth:post": {
+			"operationId": "/api/device/operator-auth:post",
+			"request": {
+				"operationId": "/api/device/operator-auth:post",
+				"auth": [ "bearerDeviceAuth" ],
+				"request": {
+					"type": "42c",
+					"details": {
+						"operationId": "/api/device/operator-auth:post",
+						"method": "POST",
+						"url": "{{host}}/api/device/operator-auth",
+						"headers": [ {
+							"key": "Content-Type",
+							"value": "application/json"
+						} ],
+						"requestBody": {
+							"mode": "json",
+							"json": {
+								"cabinetCode": "zzdhaykrnwlllpfgoxfvmhdvkekjrtjj",
+								"credential": "sekvasqvbynpgwpgqvcxtyexbxtpkcrr",
+								"method": "PIN"
+							}
+						}
+					}
+				},
+				"defaultResponse": "200",
+				"responses": {
+					"200": {
+						"expectations": {
+							"httpStatus": 200
+						}
+					},
+					"400": {
+						"expectations": {
+							"httpStatus": 400
+						}
+					},
+					"401": {
+						"expectations": {
+							"httpStatus": 401
+						}
+					}
+				}
+			},
+			"scenarios": [ {
+				"key": "happy.path",
+				"requests": [ {
+					"fuzzing": true,
+					"$ref": "#/operations/~1api~1device~1operator-auth:post/request"
+				} ],
+				"fuzzing": true
+			} ]
+		},
+		"/api/operators/{operatorId}/end-of-day-check:get": {
+			"operationId": "/api/operators/{operatorId}/end-of-day-check:get",
+			"request": {
+				"operationId": "/api/operators/{operatorId}/end-of-day-check:get",
+				"auth": [ "bearerOperatorAuth" ],
+				"request": {
+					"type": "42c",
+					"details": {
+						"operationId": "/api/operators/{operatorId}/end-of-day-check:get",
+						"method": "GET",
+						"url": "{{host}}/api/operators/{operatorId}/end-of-day-check",
+						"paths": [ {
+							"key": "operatorId",
+							"value": "gwncdyaaznjjfsldrizlvsxteharvees"
+						} ]
+					}
+				},
+				"defaultResponse": "200",
+				"responses": {
+					"200": {
+						"expectations": {
+							"httpStatus": 200
+						}
+					}
+				}
+			},
+			"scenarios": [ {
+				"key": "happy.path",
+				"requests": [ {
+					"fuzzing": true,
+					"$ref": "#/operations/~1api~1operators~1{operatorId}~1end-of-day-check:get/request"
+				} ],
+				"fuzzing": true
+			} ]
+		},
+		"/api/operators/{operatorId}/tool-assignments:get": {
+			"operationId": "/api/operators/{operatorId}/tool-assignments:get",
+			"request": {
+				"operationId": "/api/operators/{operatorId}/tool-assignments:get",
+				"auth": [ "bearerOperatorAuth" ],
+				"request": {
+					"type": "42c",
+					"details": {
+						"operationId": "/api/operators/{operatorId}/tool-assignments:get",
+						"method": "GET",
+						"url": "{{host}}/api/operators/{operatorId}/tool-assignments",
+						"queries": [ {
+							"key": "status",
+							"value": "ACTIVE"
+						} ],
+						"paths": [ {
+							"key": "operatorId",
+							"value": "uhxuseqdfkhnkxrynjelzawbsmgjuurr"
+						} ]
+					}
+				},
+				"defaultResponse": "200",
+				"responses": {
+					"200": {
+						"expectations": {
+							"httpStatus": 200
+						}
+					}
+				}
+			},
+			"scenarios": [ {
+				"key": "happy.path",
+				"requests": [ {
+					"fuzzing": true,
+					"$ref": "#/operations/~1api~1operators~1{operatorId}~1tool-assignments:get/request"
+				} ],
+				"fuzzing": true
+			} ]
+		},
+		"/api/supervisor/resolutions:get": {
+			"operationId": "/api/supervisor/resolutions:get",
+			"request": {
+				"operationId": "/api/supervisor/resolutions:get",
+				"auth": [ "bearerSupervisorAuth" ],
+				"request": {
+					"type": "42c",
+					"details": {
+						"operationId": "/api/supervisor/resolutions:get",
+						"method": "GET",
+						"url": "{{host}}/api/supervisor/resolutions",
+						"queries": [ {
+							"key": "operatorId",
+							"value": "rzqcuisdfmkdncxryegqrxyyzmndhhpj"
+						} ]
+					}
+				},
+				"defaultResponse": "200",
+				"responses": {
+					"200": {
+						"expectations": {
+							"httpStatus": 200
+						}
+					}
+				}
+			},
+			"scenarios": [ {
+				"key": "happy.path",
+				"requests": [ {
+					"fuzzing": true,
+					"$ref": "#/operations/~1api~1supervisor~1resolutions:get/request"
+				} ],
+				"fuzzing": true
+			} ]
+		},
+		"/api/supervisor/resolutions:post": {
+			"operationId": "/api/supervisor/resolutions:post",
+			"request": {
+				"operationId": "/api/supervisor/resolutions:post",
+				"auth": [ "bearerSupervisorAuth" ],
+				"request": {
+					"type": "42c",
+					"details": {
+						"operationId": "/api/supervisor/resolutions:post",
+						"method": "POST",
+						"url": "{{host}}/api/supervisor/resolutions",
+						"headers": [ {
+							"key": "Content-Type",
+							"value": "application/json"
+						} ],
+						"requestBody": {
+							"mode": "json",
+							"json": {
+								"allowExit": true,
+								"assignmentIds": [ "33333333-3333-3333-3333-333333333333" ],
+								"decisionAt": "2026-04-16T18:10:00Z",
+								"operatorId": "11111111-1111-1111-1111-111111111111",
+								"reasonCode": "TOOL_NOT_RETURNED",
+								"reportText": "Ferramenta não devolvida no final do turno; ocorrência registada para tratamento interno.",
+								"supervisorId": "55555555-5555-5555-5555-555555555555"
+							}
+						}
+					}
+				},
+				"defaultResponse": "201",
+				"responses": {
+					"201": {
+						"expectations": {
+							"httpStatus": 201
+						}
+					},
+					"400": {
+						"expectations": {
+							"httpStatus": 400
+						}
+					},
+					"401": {
+						"expectations": {
+							"httpStatus": 401
+						}
+					}
+				}
+			},
+			"scenarios": [ {
+				"key": "happy.path",
+				"requests": [ {
+					"fuzzing": true,
+					"$ref": "#/operations/~1api~1supervisor~1resolutions:post/request"
+				} ],
+				"fuzzing": true
+			} ]
+		}
+	},
+	"authenticationDetails": [ {
+		"bearerAdminAuth": {
+			"type": "bearer",
+			"default": "bearerAdminAuth",
+			"credentials": {
+				"bearerAdminAuth": {
+					"credential": "{{bearerAdminAuth}}",
+					"description": "bearerAdminAuth security"
+				}
+			}
+		},
+		"bearerDeviceAuth": {
+			"type": "bearer",
+			"default": "bearerDeviceAuth",
+			"credentials": {
+				"bearerDeviceAuth": {
+					"credential": "{{bearerDeviceAuth}}",
+					"description": "bearerDeviceAuth security"
+				}
+			}
+		},
+		"bearerOperatorAuth": {
+			"type": "bearer",
+			"default": "bearerOperatorAuth",
+			"credentials": {
+				"bearerOperatorAuth": {
+					"credential": "{{bearerOperatorAuth}}",
+					"description": "bearerOperatorAuth security"
+				}
+			}
+		},
+		"bearerSupervisorAuth": {
+			"type": "bearer",
+			"default": "bearerSupervisorAuth",
+			"credentials": {
+				"bearerSupervisorAuth": {
+					"credential": "{{bearerSupervisorAuth}}",
+					"description": "bearerSupervisorAuth security"
+				}
+			}
+		}
+	} ]
+}

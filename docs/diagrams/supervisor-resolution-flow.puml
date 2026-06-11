@@ -1,0 +1,22 @@
+﻿@startuml
+|Sistema|
+start
+:Detetar pendências/discrepâncias;
+:Notificar necessidade de supervisor;
+
+|Supervisor|
+:Autenticar;
+:Consultar atribuições pendentes abrangidas;
+:Investigar o porquê das pendências/discrepâncias;
+:Selecionar reasonCode;
+:Escrever reportText;
+:Definir allowExit;
+
+|Sistema|
+:Persistir SupervisorResolution;
+:Associar ToolAssignments abrangidos;
+:Registar AuditLog da decisão;
+:Encaminhar tratamento material posterior para a empresa;
+
+stop
+@enduml

@@ -1,0 +1,56 @@
+tool: adicicionar type(codigo numeric) e numero de serie (optional).
+
+sessao mudar nome para requesição ou algo que faça mais sentido
+
+armario fecha sempre mas guarda status de que fechou mal ou que faltam cena se o que. dps as situaçoes são tratados pela empresa e não é connosco.
+
+Domain model:
+
+relções primeiro e depois mostra detalhes, em alto nivel, porque logo apos do nome
+
+no workflow:
+atores e so operador
+
+o resto são components
+
+
+o foco do trabalho deveria ser só nas ferramentas e não  me devia procurer com coisas como adicionar o armário.
+
+um  armario pode ser abertos por ser aberto por vários users pq são armarios partilhados e cada user vai tirar varias ferramentas de varios armarios e só devolve ao fim do dia.
+
+diagramas uml de use case.
+
+
+um armario pode ter varias ferramentas. 
+
+falhas dos armarios e tuipos de falhas, user tem maisn um para,metro de ter ferramentas nao entregues ainda por aberto. se um operador faltar entregar uma ferramenta vai ter que ser chamado o supercidor pq pode ser falha do armário, ou ent a ferra«menta partiu-se ou o que for e isto também tem que ser registado
+
+plub in no intelij para diagramas a partir de markdown
+
+swagger para descrever api e escrever esqueleto do servidor para api e do cliente
+
+
+questão pessoal: pq e que temos a parte da auditoria
+
+
+--------------------------------------------------------------------------------------------------------------
+
+
+mail com estrutura do relatorio de dia 1( estudei o que tinha para estudar)
+texto com a como vai ser a api
+estudo que fiz apresentar como e que vai ser a api
+este documento seve ser uma evolução do anterior e traçar o caminho para o final
+secçao introduçao
+equadramento
+levatamento dos requecitos
+como e que vou implementar a pai( principal)
+atualizar a calendarize;#ao do trabalho se for preciso e dizer como estoun em termos de timing
+
+outro modelo(mandasr sempre logs de quando as ferramentas sao retiradas e devolvidas paratambém saber quais as mais usadas):
+
+
+
+muuto importante:
+limitar me a api eu so tenho que me preocupar com a api não tenho que me precupar com coisas extra como devolver a meio do dia e assim quando para mim como vou so desenvolver a api so tenho que me preocupar com o devolve.
+
+talvez complicar: imagina que tinhas uma armario com diferentes gaveta e podiamos destrancar so algumas. armarios dentro de armarios.

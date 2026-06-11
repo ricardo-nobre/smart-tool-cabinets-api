@@ -1,0 +1,34 @@
+﻿@startmindmap
+* Domínio de custódia
+** Entidades centrais
+*** ToolAssignment
+**** Estado de custódia por operador
+**** Estados: ACTIVE, RETURNED, PENDING_REVIEW, RESOLVED
+*** CabinetAccess
+**** Interação local com armário
+**** Estado: OPEN ou CLOSED
+*** SupervisorResolution
+**** Decisão humana formal
+**** Campos obrigatórios: reasonCode, reportText, allowExit
+*** AuditLog
+**** Rastreabilidade transversal
+** Entidades de suporte
+*** User
+**** Perfis: OPERATOR, SUPERVISOR, ADMIN
+*** Tool
+**** tagCode único global
+**** typeCode e serialNumber opcional
+*** Cabinet
+**** Identificação física do armário
+*** InventorySnapshot
+**** Tipos: BEFORE, AFTER, EXTRA
+*** InventorySnapshotItem
+**** Tag observada reconhecida ou desconhecida
+*** CabinetEvent
+**** Eventos do dispositivo
+** Relações lógicas
+*** CabinetAccess agrega snapshots e eventos
+*** Delta BEFORE/AFTER atualiza ToolAssignment
+*** SupervisorResolution cobre uma ou mais ToolAssignments
+*** AuditLog regista ações sobre CabinetAccess, ToolAssignment e SupervisorResolution
+@endmindmap

@@ -1,0 +1,110 @@
+Folder PATH listing
+Volume serial number is BE6C-C81F
+C:\USERS\RNOBRE\DOWNLOADS\00_PESSOAL\ESCOLINHA\PROJETO
+|   .env.example
+|   .gitignore
+|   docker-compose.yml
+|   estrutura.txt
+|   pom.xml
+|   README.md
+|   
++---backend
+|   |   pom.xml
+|   |   
+|   \---src
+|       +---main
+|       |   +---java
+|       |   |   \---smarttoolcabinets
+|       |   |       |   SmartToolCabinetsApplication.java
+|       |   |       |   
+|       |   |       +---audit
+|       |   |       +---cabinet
+|       |   |       +---common
+|       |   |       |   \---exception
+|       |   |       |           GlobalExceptionHandler.java
+|       |   |       |           
+|       |   |       +---config
+|       |   |       |       JacksonConfig.java
+|       |   |       |       OpenApiConfig.java
+|       |   |       |       SecurityConfig.java
+|       |   |       |       
+|       |   |       +---event
+|       |   |       +---inventory
+|       |   |       +---session
+|       |   |       +---tool
+|       |   |       \---user
+|       |   \---resources
+|       |       |   application-dev.yml
+|       |       |   application-test.yml
+|       |       |   application.yml
+|       |       |   logback-spring.xml
+|       |       |   
+|       |       \---db
+|       |           \---migration
+|       |                   V1__init_schema.sql
+|       |                   V2__seed_reference_data.sql
+|       |                   
+|       \---test
+|           +---java
+|           |   \---smarttoolcabinets
+|           |       |   SmartToolCabinetsApplicationTests.java
+|           |       |   
+|           |       \---support
+|           |               TestDataFactory.java
+|           |               
+|           \---resources
+|                   application-test.yml
+|                   
++---docs
+|   +---api
+|   |       openapi-notes.md
+|   |       
+|   +---architecture
+|   |       domain-model.md
+|   |       sequence-session-close.md
+|   |       
+|   \---report
+|           report-notes.md
+|           
++---Relatórios e ficheiros
+|       4_ Proposta Projeto LEIRT 2025_20256_TDI.pdf
+|       Relatorio_Inicial_Projeto_48713.pdf
+|       
++---scripts
+|   \---dev
+|           reset-db.cmd
+|           run-simulator-missing-tool.cmd
+|           run-simulator-normal.cmd
+|           start-local.cmd
+|           stop-local.cmd
+|           
+\---simulator
+    |   pom.xml
+    |   
+    \---src
+        +---main
+        |   +---java
+        |   |   \---smarttoolcabinets
+        |   |       \---simulator
+        |   |           |   SimulatorApplication.java
+        |   |           |   
+        |   |           +---cli
+        |   |           |       RootCommand.java
+        |   |           |       
+        |   |           +---client
+        |   |           |       BackendClient.java
+        |   |           |       
+        |   |           +---config
+        |   |           |       SimulatorProperties.java
+        |   |           |       
+        |   |           +---model
+        |   |           \---scenario
+        |   \---resources
+        |           application.properties
+        |           
+        \---test
+            \---java
+                \---smarttoolcabinets
+                    \---simulator
+                            SimulatorSmokeTest.java
+                            

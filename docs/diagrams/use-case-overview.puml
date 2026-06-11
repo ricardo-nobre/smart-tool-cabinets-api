@@ -1,0 +1,21 @@
+﻿@startmindmap
+* Casos de uso da API
+** Operador
+*** Autenticar operador
+*** Abrir armário
+*** Registar snapshot BEFORE
+*** Retirar ou devolver ferramentas
+*** Registar snapshot AFTER
+*** Fechar armário
+*** Consultar fim do dia
+** Supervisor
+*** Consultar pendências
+*** Investigar situação
+*** Registar reasonCode
+*** Escrever reportText
+*** Decidir allowExit
+** Sistema
+*** Detetar pendências e discrepâncias
+*** Atualizar ToolAssignment
+*** Registar AuditLog
+@endmindmap

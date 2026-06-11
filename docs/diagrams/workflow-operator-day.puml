@@ -1,0 +1,38 @@
+﻿@startuml
+|Operador|
+start
+repeat
+:Autenticar-se no armário;
+|Sistema|
+:Abrir armário;
+:Snapshot BEFORE;
+|Operador|
+:Retirar/devolver ferramentas;
+|Sistema|
+:Snapshot AFTER;
+:Calcular delta;
+:Atualizar ToolAssignment (devolveu ou não devolveu);
+:Fechar armário;
+repeat while (Vai a outro armário?) is (sim)
+
+|Sistema|
+:Validação ao fim do dia;
+if (Tem pendências?) then (não)
+  :Operador apto para sair;
+  stop
+else (sim)
+  |Supervisor|
+  :Investigar pendências;
+  :Classificar causa humana (não inferida pelo sistema);
+  :Registar reasonCode + reportText;
+  :Definir allowExit;
+  |Sistema|
+  :Registar AuditLog da decisão;
+  if (allowExit=true?) then (sim)
+    :Autorizar saída operacional;
+  else (não)
+    :Manter pendência operacional;
+  endif
+  stop
+endif
+@enduml
