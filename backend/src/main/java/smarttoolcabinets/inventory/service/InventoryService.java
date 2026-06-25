@@ -10,8 +10,8 @@ import smarttoolcabinets.inventory.dto.CreateSnapshotRequest;
 import smarttoolcabinets.inventory.dto.CreateSnapshotResponse;
 import smarttoolcabinets.inventory.repository.InventorySnapshotItemRepository;
 import smarttoolcabinets.inventory.repository.InventorySnapshotRepository;
-import smarttoolcabinets.session.domain.Session;
-import smarttoolcabinets.session.repository.SessionRepository;
+import smarttoolcabinets.cabinetaccess.domain.CabinetAccess;
+import smarttoolcabinets.cabinetaccess.repository.CabinetAccessRepository;
 import smarttoolcabinets.tool.domain.Tool;
 import smarttoolcabinets.tool.repository.ToolRepository;
 
@@ -26,14 +26,14 @@ public class InventoryService {
 
     private final InventorySnapshotRepository inventorySnapshotRepository;
     private final InventorySnapshotItemRepository inventorySnapshotItemRepository;
-    private final SessionRepository sessionRepository;
+    private final CabinetAccessRepository cabinetAccessRepository;
     private final AuditService auditService;
     private final ToolRepository toolRepository;
 
 
-    public InventoryService(InventorySnapshotRepository inventorySnapshotRepository, SessionRepository sessionRepository, AuditService auditService, ToolRepository toolRepository, InventorySnapshotItemRepository inventorySnapshotItemRepository) {
+    public InventoryService(InventorySnapshotRepository inventorySnapshotRepository, CabinetAccessRepository cabinetAccessRepository, AuditService auditService, ToolRepository toolRepository, InventorySnapshotItemRepository inventorySnapshotItemRepository) {
         this.inventorySnapshotRepository = inventorySnapshotRepository;
-        this.sessionRepository = sessionRepository;
+        this.cabinetAccessRepository = cabinetAccessRepository;
         this.auditService = auditService;
         this.toolRepository = toolRepository;
         this.inventorySnapshotItemRepository = inventorySnapshotItemRepository;
@@ -69,10 +69,10 @@ public class InventoryService {
             throw new IllegalArgumentException("Invalid cabinetAccessId: " + cabinetAccessId);
         }
 
-        Session session = sessionRepository.findById(parsedCabinetAccessId)
+        CabinetAccess cabinetAccess = cabinetAccessRepository.findById(parsedCabinetAccessId)
                 .orElseThrow(() -> new IllegalArgumentException("CabinetAccess not found: " + parsedCabinetAccessId));
 
-        if (!"OPEN".equals(session.getStatus())) {
+        if (!"OPEN".equals(cabinetAccess.getStatus())) {
             throw new IllegalStateException("Cannot create snapshot for closed cabinetAccess: " + parsedCabinetAccessId);
         }
 

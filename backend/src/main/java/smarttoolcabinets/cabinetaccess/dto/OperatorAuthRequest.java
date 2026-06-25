@@ -1,4 +1,4 @@
-package smarttoolcabinets.session.dto;
+package smarttoolcabinets.cabinetaccess.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

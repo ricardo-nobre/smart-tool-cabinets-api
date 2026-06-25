@@ -10,8 +10,8 @@ import smarttoolcabinets.event.domain.CabinetEvent;
 import smarttoolcabinets.event.dto.RegisterCabinetEventRequest;
 import smarttoolcabinets.event.dto.RegisterCabinetEventResponse;
 import smarttoolcabinets.event.repository.CabinetEventRepository;
-import smarttoolcabinets.session.domain.Session;
-import smarttoolcabinets.session.repository.SessionRepository;
+import smarttoolcabinets.cabinetaccess.domain.CabinetAccess;
+import smarttoolcabinets.cabinetaccess.repository.CabinetAccessRepository;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -22,13 +22,13 @@ import java.util.UUID;
 @Service
 public class DeviceEventService {
 
-    private final SessionRepository sessionRepository;
+    private final CabinetAccessRepository cabinetAccessRepository;
     private final CabinetEventRepository cabinetEventRepository;
     private final AuditService auditService;
     private final ObjectMapper objectMapper;
 
-    public DeviceEventService(SessionRepository sessionRepository, CabinetEventRepository cabinetEventRepository, AuditService auditService,  ObjectMapper objectMapper) {
-        this.sessionRepository = sessionRepository;
+    public DeviceEventService(CabinetAccessRepository cabinetAccessRepository, CabinetEventRepository cabinetEventRepository, AuditService auditService,  ObjectMapper objectMapper) {
+        this.cabinetAccessRepository = cabinetAccessRepository;
         this.cabinetEventRepository = cabinetEventRepository;
         this.auditService = auditService;
         this.objectMapper = objectMapper;
@@ -57,12 +57,12 @@ public class DeviceEventService {
                 throw new IllegalArgumentException("Invalid event payload");
             }
         }
-        Optional<Session> session = sessionRepository.findById(cabinetAccessId);
-        if(session.isEmpty()) {
+        Optional<CabinetAccess> cabinetAccess = cabinetAccessRepository.findById(cabinetAccessId);
+        if(cabinetAccess.isEmpty()) {
             throw new IllegalArgumentException("CabinetAccess not found: " + cabinetAccessId);
         }
-        Session s = session.get();
-        if (!"OPEN".equals(s.getStatus())) {
+        CabinetAccess access = cabinetAccess.get();
+        if (!"OPEN".equals(access.getStatus())) {
             throw new IllegalStateException("CabinetAccess is not open: " + cabinetAccessId);
         }
 

@@ -1,4 +1,4 @@
-package smarttoolcabinets.session.service;
+package smarttoolcabinets.cabinetaccess.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,11 +10,11 @@ import smarttoolcabinets.inventory.domain.InventorySnapshotItem;
 import smarttoolcabinets.inventory.repository.InventorySnapshotItemRepository;
 import smarttoolcabinets.inventory.repository.InventorySnapshotRepository;
 import smarttoolcabinets.inventory.service.InventoryDeltaService;
-import smarttoolcabinets.session.domain.Session;
-import smarttoolcabinets.session.dto.CloseSessionResponse;
-import smarttoolcabinets.session.dto.OpenSessionRequest;
-import smarttoolcabinets.session.dto.OpenSessionResponse;
-import smarttoolcabinets.session.repository.SessionRepository;
+import smarttoolcabinets.cabinetaccess.domain.CabinetAccess;
+import smarttoolcabinets.cabinetaccess.dto.CloseCabinetAccessResponse;
+import smarttoolcabinets.cabinetaccess.dto.OpenCabinetAccessRequest;
+import smarttoolcabinets.cabinetaccess.dto.OpenCabinetAccessResponse;
+import smarttoolcabinets.cabinetaccess.repository.CabinetAccessRepository;
 import smarttoolcabinets.toolassignment.domain.ToolAssignment;
 import smarttoolcabinets.toolassignment.repository.ToolAssignmentRepository;
 import smarttoolcabinets.user.repository.UserRepository;
@@ -31,9 +31,9 @@ import java.util.stream.Collectors;
  * Service do ciclo de vida de CabinetAccess no dispositivo.
  */
 @Service
-public class DeviceSessionService {
+public class DeviceCabinetAccessService {
 
-    private final SessionRepository sessionRepository;
+    private final CabinetAccessRepository cabinetAccessRepository;
     private final CabinetRepository cabinetRepository;
     private final UserRepository userRepository;
     private final AuditService auditService;
@@ -42,8 +42,8 @@ public class DeviceSessionService {
     private final ToolAssignmentRepository toolAssignmentRepository;
     private final InventoryDeltaService inventoryDeltaService;
 
-    public DeviceSessionService(
-            SessionRepository sessionRepository,
+    public DeviceCabinetAccessService(
+            CabinetAccessRepository cabinetAccessRepository,
             CabinetRepository cabinetRepository,
             UserRepository userRepository,
             AuditService auditService,
@@ -52,7 +52,7 @@ public class DeviceSessionService {
             ToolAssignmentRepository toolAssignmentRepository,
             InventoryDeltaService inventoryDeltaService
     ) {
-        this.sessionRepository = sessionRepository;
+        this.cabinetAccessRepository = cabinetAccessRepository;
         this.cabinetRepository = cabinetRepository;
         this.userRepository = userRepository;
         this.auditService = auditService;
@@ -66,7 +66,7 @@ public class DeviceSessionService {
      * Abre CabinetAccess para o armario e operador autenticado.
      */
     @Transactional
-    public OpenSessionResponse openSession(OpenSessionRequest request) {
+    public OpenCabinetAccessResponse openCabinetAccess(OpenCabinetAccessRequest request) {
           if (request == null) {
               throw new IllegalArgumentException("request is required");
           }
@@ -95,12 +95,12 @@ public class DeviceSessionService {
               throw new IllegalArgumentException("operator must have role OPERATOR");
           }
 
-          if (sessionRepository.findFirstByCabinetIdAndStatus(cabinet.getId(), "OPEN").isPresent()) {
-              throw new IllegalStateException("an OPEN session already exists for cabinet: " + cabinet.getId());
+          if (cabinetAccessRepository.findFirstByCabinetIdAndStatus(cabinet.getId(), "OPEN").isPresent()) {
+              throw new IllegalStateException("an OPEN cabinetAccess already exists for cabinet: " + cabinet.getId());
           }
 
-          Session session = Session.open(cabinet.getId(), operatorId);
-          Session saved = sessionRepository.save(session);
+          CabinetAccess cabinetAccess = CabinetAccess.open(cabinet.getId(), operatorId);
+          CabinetAccess saved = cabinetAccessRepository.save(cabinetAccess);
 
           auditService.logAction(
                   "DEVICE:" + cabinet.getCode(),
@@ -109,14 +109,14 @@ public class DeviceSessionService {
                   saved.getId().toString()
           );
 
-          return new OpenSessionResponse(saved.getId(), saved.getStatus(), saved.getOpenedAt());
+          return new OpenCabinetAccessResponse(saved.getId(), saved.getStatus(), saved.getOpenedAt());
       }
 
     /**
      * Fecha CabinetAccess e devolve resultado operacional baseline.
      */
     @Transactional
-    public CloseSessionResponse closeSession(String cabinetAccessId) {
+    public CloseCabinetAccessResponse closeCabinetAccess(String cabinetAccessId) {
         if (cabinetAccessId == null || cabinetAccessId.isBlank()) {
             throw new IllegalArgumentException("cabinetAccessId is required");
         }
@@ -128,11 +128,11 @@ public class DeviceSessionService {
             throw new IllegalArgumentException("Invalid cabinetAccessId: " + cabinetAccessId);
         }
 
-        Optional<Session> session = sessionRepository.findById(parsedCabinetAccessId);
-        if( session.isEmpty()) {
+        Optional<CabinetAccess> cabinetAccess = cabinetAccessRepository.findById(parsedCabinetAccessId);
+        if(cabinetAccess.isEmpty()) {
             throw new IllegalArgumentException("cabinetAccess not found");
         }
-        Session s = session.get();
+        CabinetAccess s = cabinetAccess.get();
         if(!s.getStatus().equals("OPEN")) {
             throw new IllegalStateException("CabinetAccess is not open: " + parsedCabinetAccessId);
         }
@@ -206,7 +206,7 @@ public class DeviceSessionService {
         }
 
         s.close();
-        Session saved = sessionRepository.save(s);
+        CabinetAccess saved = cabinetAccessRepository.save(s);
         auditService.logAction(
                 "CABINET_ACCESS:" + saved.getId(),
                 "CLOSE_CABINET_ACCESS",
@@ -225,7 +225,7 @@ public class DeviceSessionService {
             operationalResult = "CLOSED_OK";
         }
 
-        return new CloseSessionResponse(
+        return new CloseCabinetAccessResponse(
                 saved.getId(),
                 saved.getStatus(),
                 saved.getClosedAt(),

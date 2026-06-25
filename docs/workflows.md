@@ -1,4 +1,4 @@
-﻿# Workflows e casos de uso (API-first)
+# Workflows e casos de uso (API-first)
 
 Este ficheiro descreve apenas o comportamento necessário para provar a API no relatório intermédio.
 

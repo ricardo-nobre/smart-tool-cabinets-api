@@ -70,7 +70,7 @@ The token mechanism is deliberately simple for the MVP. Tokens such as `DEV-TOKE
 - `GET /api/operators/{operatorId}/end-of-day-check`
 - `POST /api/supervisor/resolutions`
 
-The public API uses the `CabinetAccess` concept. Some internal Java classes still use the older `Session` name as technical debt.
+The public API and backend code use the `CabinetAccess` concept.
 
 ## Simulator Scripts
 
@@ -130,7 +130,6 @@ Known limitations:
 
 - authentication is simplified and not production-grade;
 - token values are not persisted or cryptographically validated;
-- internal naming still contains `Session` in some classes;
 - simulator is intentionally minimal and HTTP-script based;
 - OpenAPI is only required to track the demonstrable MVP endpoints;
 - no dashboard, mobile app, analytics, Kubernetes or external integrations are part of this MVP.
@@ -138,6 +137,5 @@ Known limitations:
 ## Next Steps
 
 - render the EA diagram and include it in the final report;
-- align internal `Session` naming to `CabinetAccess`;
 - review OpenAPI examples against the final demo flow;
 - improve credential handling if time allows.

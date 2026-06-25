@@ -1,4 +1,4 @@
-﻿@startuml
+@startuml
 |Sistema|
 start
 :Detetar pendências/discrepâncias;

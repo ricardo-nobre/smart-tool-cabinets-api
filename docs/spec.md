@@ -1,4 +1,4 @@
-﻿# Especificação técnica (API-first)
+# Especificação técnica (API-first)
 
 Este documento liga regras, modelo de dados e contrato da API para uso direto no relatório intermédio.
 A fonte de verdade para requests e responses continua em `docs/api/openapi.yaml`.

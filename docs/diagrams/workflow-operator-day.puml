@@ -1,4 +1,4 @@
-﻿@startuml
+@startuml
 |Operador|
 start
 repeat

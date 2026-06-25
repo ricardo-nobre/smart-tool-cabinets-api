@@ -1,4 +1,4 @@
-package smarttoolcabinets.session.service;
+package smarttoolcabinets.cabinetaccess.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +8,7 @@ import smarttoolcabinets.cabinet.domain.Cabinet;
 import smarttoolcabinets.cabinet.repository.CabinetRepository;
 import smarttoolcabinets.inventory.dto.CreateSnapshotRequest;
 import smarttoolcabinets.inventory.service.InventoryService;
-import smarttoolcabinets.session.dto.OpenSessionRequest;
+import smarttoolcabinets.cabinetaccess.dto.OpenCabinetAccessRequest;
 import smarttoolcabinets.tool.domain.Tool;
 import smarttoolcabinets.tool.repository.ToolRepository;
 import smarttoolcabinets.toolassignment.repository.ToolAssignmentRepository;
@@ -23,10 +23,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
-class DeviceSessionServiceTest {
+class DeviceCabinetAccessServiceTest {
 
     @Autowired
-    private DeviceSessionService deviceSessionService;
+    private DeviceCabinetAccessService deviceCabinetAccessService;
 
     @Autowired
     private InventoryService inventoryService;
@@ -51,7 +51,7 @@ class DeviceSessionServiceTest {
         Tool toolA = toolRepository.save(Tool.newTool(cabinet.getId(), "TAG-A-" + suffix, "Tool A", 1, null));
         Tool toolB = toolRepository.save(Tool.newTool(cabinet.getId(), "TAG-B-" + suffix, "Tool B", 1, null));
 
-        var opened = deviceSessionService.openSession(new OpenSessionRequest(cabinet.getCode(), operator.getId()));
+        var opened = deviceCabinetAccessService.openCabinetAccess(new OpenCabinetAccessRequest(cabinet.getCode(), operator.getId()));
 
         inventoryService.createSnapshot(opened.cabinetAccessId().toString(), new CreateSnapshotRequest(
                 "BEFORE",
@@ -66,7 +66,7 @@ class DeviceSessionServiceTest {
                 List.of(toolA.getTagCode())
         ));
 
-        var closed = deviceSessionService.closeSession(opened.cabinetAccessId().toString());
+        var closed = deviceCabinetAccessService.closeCabinetAccess(opened.cabinetAccessId().toString());
 
         assertThat(closed.operationalResult()).isEqualTo("CLOSED_WITH_ASSIGNMENTS");
         assertThat(closed.assignmentsCreatedCount()).isEqualTo(1);

@@ -1,4 +1,4 @@
-﻿# Documentação do projeto
+# Documentação do projeto
 
 A documentação está organizada para suportar o relatório intermédio com foco em API-first.
 

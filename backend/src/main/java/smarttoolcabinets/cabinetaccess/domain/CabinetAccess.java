@@ -1,4 +1,4 @@
-package smarttoolcabinets.session.domain;
+package smarttoolcabinets.cabinetaccess.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,14 +9,11 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 /**
- * Entidade de acesso operacional ao armario (CabinetAccess).
- *
- * Mantemos o nome de classe `Session` apenas por compatibilidade interna,
- * mas o contrato e o schema oficiais usam o conceito `CabinetAccess`.
+ * Entidade de acesso operacional ao armario.
  */
 @Entity
 @Table(name = "cabinet_access")
-public class Session {
+public class CabinetAccess {
 
     @Id
     private UUID id;
@@ -39,20 +36,20 @@ public class Session {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
-    protected Session() {
+    protected CabinetAccess() {
 
     }
 
-    public static Session open(UUID cabinetId, UUID operatorId) {
-        Session session = new Session();
-        session.id = UUID.randomUUID();
-        session.cabinetId = cabinetId;
-        session.operatorId = operatorId;
-        session.status = "OPEN";
-        session.openedAt = OffsetDateTime.now();
-        session.closedAt = null;
-        session.createdAt = OffsetDateTime.now();
-        return session;
+    public static CabinetAccess open(UUID cabinetId, UUID operatorId) {
+        CabinetAccess cabinetAccess = new CabinetAccess();
+        cabinetAccess.id = UUID.randomUUID();
+        cabinetAccess.cabinetId = cabinetId;
+        cabinetAccess.operatorId = operatorId;
+        cabinetAccess.status = "OPEN";
+        cabinetAccess.openedAt = OffsetDateTime.now();
+        cabinetAccess.closedAt = null;
+        cabinetAccess.createdAt = OffsetDateTime.now();
+        return cabinetAccess;
     }
 
     public UUID getId() {

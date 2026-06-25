@@ -1,4 +1,4 @@
-package smarttoolcabinets.session.controller;
+package smarttoolcabinets.cabinetaccess.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import smarttoolcabinets.session.dto.OperatorAuthRequest;
-import smarttoolcabinets.session.dto.OperatorAuthResponse;
-import smarttoolcabinets.session.service.DeviceOperatorAuthService;
+import smarttoolcabinets.cabinetaccess.dto.OperatorAuthRequest;
+import smarttoolcabinets.cabinetaccess.dto.OperatorAuthResponse;
+import smarttoolcabinets.cabinetaccess.service.DeviceOperatorAuthService;
 
 /**
  * Endpoint de autenticacao de operador no armario.

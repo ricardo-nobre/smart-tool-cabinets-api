@@ -1,4 +1,4 @@
-package smarttoolcabinets.session.dto;
+package smarttoolcabinets.cabinetaccess.dto;
 
 import java.util.UUID;
 

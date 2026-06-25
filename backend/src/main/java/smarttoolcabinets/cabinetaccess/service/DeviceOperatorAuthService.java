@@ -1,10 +1,10 @@
-package smarttoolcabinets.session.service;
+package smarttoolcabinets.cabinetaccess.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.security.authentication.BadCredentialsException;
 import smarttoolcabinets.cabinet.repository.CabinetRepository;
-import smarttoolcabinets.session.dto.OperatorAuthRequest;
-import smarttoolcabinets.session.dto.OperatorAuthResponse;
+import smarttoolcabinets.cabinetaccess.dto.OperatorAuthRequest;
+import smarttoolcabinets.cabinetaccess.dto.OperatorAuthResponse;
 import smarttoolcabinets.user.domain.User;
 import smarttoolcabinets.user.repository.UserRepository;
 

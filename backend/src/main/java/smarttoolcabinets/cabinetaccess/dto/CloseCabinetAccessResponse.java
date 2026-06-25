@@ -1,4 +1,4 @@
-package smarttoolcabinets.session.dto;
+package smarttoolcabinets.cabinetaccess.dto;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -6,7 +6,7 @@ import java.util.UUID;
 /**
  * Resposta de fecho final de CabinetAccess.
  */
-public record CloseSessionResponse (
+public record CloseCabinetAccessResponse (
         UUID cabinetAccessId,
         String status,
         OffsetDateTime closedAt,

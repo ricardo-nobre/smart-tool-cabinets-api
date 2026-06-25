@@ -1,4 +1,4 @@
-package smarttoolcabinets.session.controller;
+package smarttoolcabinets.cabinetaccess.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -7,23 +7,23 @@ import org.springframework.web.bind.annotation.*;
 import smarttoolcabinets.inventory.dto.CreateSnapshotRequest;
 import smarttoolcabinets.inventory.dto.CreateSnapshotResponse;
 import smarttoolcabinets.inventory.service.InventoryService;
-import smarttoolcabinets.session.dto.CloseSessionResponse;
-import smarttoolcabinets.session.dto.OpenSessionRequest;
-import smarttoolcabinets.session.dto.OpenSessionResponse;
-import smarttoolcabinets.session.service.DeviceSessionService;
+import smarttoolcabinets.cabinetaccess.dto.CloseCabinetAccessResponse;
+import smarttoolcabinets.cabinetaccess.dto.OpenCabinetAccessRequest;
+import smarttoolcabinets.cabinetaccess.dto.OpenCabinetAccessResponse;
+import smarttoolcabinets.cabinetaccess.service.DeviceCabinetAccessService;
 
 /**
  * Controller do fluxo de CabinetAccess para endpoints de dispositivo.
  */
 @RestController
 @RequestMapping("/api/device/cabinet-accesses")
-public class DeviceSessionController {
+public class DeviceCabinetAccessController {
 
-    private final DeviceSessionService deviceSessionService;
+    private final DeviceCabinetAccessService deviceCabinetAccessService;
     private final InventoryService inventoryService;
 
-    public DeviceSessionController(DeviceSessionService deviceSessionService,  InventoryService inventoryService) {
-        this.deviceSessionService = deviceSessionService;
+    public DeviceCabinetAccessController(DeviceCabinetAccessService deviceCabinetAccessService,  InventoryService inventoryService) {
+        this.deviceCabinetAccessService = deviceCabinetAccessService;
         this.inventoryService = inventoryService;
     }
 
@@ -31,9 +31,9 @@ public class DeviceSessionController {
      * Abre CabinetAccess com operatorId previamente autenticado.
      */
     @PostMapping
-    public ResponseEntity<OpenSessionResponse> openSession(
-                @Valid @RequestBody OpenSessionRequest request) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(deviceSessionService.openSession(request));
+    public ResponseEntity<OpenCabinetAccessResponse> openCabinetAccess(
+                @Valid @RequestBody OpenCabinetAccessRequest request) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(deviceCabinetAccessService.openCabinetAccess(request));
         }
 
     /**
@@ -41,8 +41,8 @@ public class DeviceSessionController {
      * O fecho fisico do armario ocorre sempre.
      */
     @PostMapping("/{cabinetAccessId}/close")
-    public ResponseEntity<CloseSessionResponse> close(@PathVariable("cabinetAccessId") String cabinetAccessId){
-        return ResponseEntity.ok(deviceSessionService.closeSession(cabinetAccessId));
+    public ResponseEntity<CloseCabinetAccessResponse> close(@PathVariable("cabinetAccessId") String cabinetAccessId){
+        return ResponseEntity.ok(deviceCabinetAccessService.closeCabinetAccess(cabinetAccessId));
     }
 
     @PostMapping("/{cabinetAccessId}/snapshots")

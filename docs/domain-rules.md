@@ -1,4 +1,4 @@
-﻿# Domínio e regras (API-first)
+# Domínio e regras (API-first)
 
 Este documento fixa o mínimo de domínio e regras que a API tem de respeitar no relatório intermédio.
 O objetivo não é modelar toda a operação da empresa, mas sim garantir coerência entre contrato, fluxo e dados.
