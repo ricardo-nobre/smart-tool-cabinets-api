@@ -1,6 +1,7 @@
 package smarttoolcabinets.session.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import smarttoolcabinets.audit.domain.AuditEntityType;
 import smarttoolcabinets.audit.service.AuditService;
 import smarttoolcabinets.cabinet.repository.CabinetRepository;
@@ -8,6 +9,7 @@ import smarttoolcabinets.inventory.domain.InventorySnapshot;
 import smarttoolcabinets.inventory.domain.InventorySnapshotItem;
 import smarttoolcabinets.inventory.repository.InventorySnapshotItemRepository;
 import smarttoolcabinets.inventory.repository.InventorySnapshotRepository;
+import smarttoolcabinets.inventory.service.InventoryDeltaService;
 import smarttoolcabinets.session.domain.Session;
 import smarttoolcabinets.session.dto.CloseSessionResponse;
 import smarttoolcabinets.session.dto.OpenSessionRequest;
@@ -38,6 +40,7 @@ public class DeviceSessionService {
     private final InventorySnapshotRepository inventorySnapshotRepository;
     private final InventorySnapshotItemRepository inventorySnapshotItemRepository;
     private final ToolAssignmentRepository toolAssignmentRepository;
+    private final InventoryDeltaService inventoryDeltaService;
 
     public DeviceSessionService(
             SessionRepository sessionRepository,
@@ -46,7 +49,8 @@ public class DeviceSessionService {
             AuditService auditService,
             InventorySnapshotRepository inventorySnapshotRepository,
             InventorySnapshotItemRepository inventorySnapshotItemRepository,
-            ToolAssignmentRepository toolAssignmentRepository
+            ToolAssignmentRepository toolAssignmentRepository,
+            InventoryDeltaService inventoryDeltaService
     ) {
         this.sessionRepository = sessionRepository;
         this.cabinetRepository = cabinetRepository;
@@ -55,11 +59,13 @@ public class DeviceSessionService {
         this.inventorySnapshotRepository = inventorySnapshotRepository;
         this.inventorySnapshotItemRepository = inventorySnapshotItemRepository;
         this.toolAssignmentRepository = toolAssignmentRepository;
+        this.inventoryDeltaService = inventoryDeltaService;
     }
 
     /**
      * Abre CabinetAccess para o armario e operador autenticado.
      */
+    @Transactional
     public OpenSessionResponse openSession(OpenSessionRequest request) {
           if (request == null) {
               throw new IllegalArgumentException("request is required");
@@ -109,6 +115,7 @@ public class DeviceSessionService {
     /**
      * Fecha CabinetAccess e devolve resultado operacional baseline.
      */
+    @Transactional
     public CloseSessionResponse closeSession(String cabinetAccessId) {
         if (cabinetAccessId == null || cabinetAccessId.isBlank()) {
             throw new IllegalArgumentException("cabinetAccessId is required");
@@ -159,14 +166,9 @@ public class DeviceSessionService {
         if (beforeSnapshot.isPresent() && afterSnapshot.isPresent()) {
             Set<UUID> beforeTools = extractRecognizedToolIds(beforeSnapshot.get().getId());
             Set<UUID> afterTools = extractRecognizedToolIds(afterSnapshot.get().getId());
+            var delta = inventoryDeltaService.calculate(beforeTools, afterTools);
 
-            Set<UUID> removedTools = new LinkedHashSet<>(beforeTools);
-            removedTools.removeAll(afterTools);
-
-            Set<UUID> returnedTools = new LinkedHashSet<>(afterTools);
-            returnedTools.removeAll(beforeTools);
-
-            for (UUID toolId : removedTools) {
+            for (UUID toolId : delta.removed()) {
                 if (toolAssignmentRepository.findByToolIdAndStatus(toolId, "ACTIVE").isPresent()) {
                     discrepancyFlag = true;
                     continue;
@@ -182,7 +184,7 @@ public class DeviceSessionService {
                 assignmentsCreatedCount++;
             }
 
-            for (UUID toolId : returnedTools) {
+            for (UUID toolId : delta.returned()) {
                 Optional<ToolAssignment> activeAssignmentOpt = toolAssignmentRepository.findByToolIdAndStatus(toolId, "ACTIVE");
                 if (activeAssignmentOpt.isEmpty()) {
                     discrepancyFlag = true;

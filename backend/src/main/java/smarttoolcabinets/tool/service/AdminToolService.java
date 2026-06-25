@@ -1,6 +1,7 @@
 package smarttoolcabinets.tool.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import smarttoolcabinets.audit.domain.AuditEntityType;
 import smarttoolcabinets.audit.service.AuditService;
 import smarttoolcabinets.cabinet.repository.CabinetRepository;
@@ -39,6 +40,7 @@ public class AdminToolService {
      * 4) Registar auditoria.
      * Notas: garantir consistencia com snapshots futuros.
      */
+    @Transactional
     public String createTool(AdminToolCreateRequest request) {
         UUID uuid = request.cabinetId();
         if(!cabinetRepository.existsById(uuid)) {

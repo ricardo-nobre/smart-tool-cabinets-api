@@ -1,6 +1,7 @@
 package smarttoolcabinets.inventory.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import smarttoolcabinets.audit.domain.AuditEntityType;
 import smarttoolcabinets.audit.service.AuditService;
 import smarttoolcabinets.inventory.domain.InventorySnapshot;
@@ -51,6 +52,7 @@ public class InventoryService {
      */
 
 
+    @Transactional
     public CreateSnapshotResponse createSnapshot(String cabinetAccessId, CreateSnapshotRequest request) {
         if (cabinetAccessId == null || cabinetAccessId.isBlank()) {
             throw new IllegalArgumentException("cabinetAccessId is required");

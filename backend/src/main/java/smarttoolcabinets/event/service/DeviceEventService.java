@@ -3,6 +3,7 @@ package smarttoolcabinets.event.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import smarttoolcabinets.audit.domain.AuditEntityType;
 import smarttoolcabinets.audit.service.AuditService;
 import smarttoolcabinets.event.domain.CabinetEvent;
@@ -44,6 +45,7 @@ public class DeviceEventService {
      * 4) Encadear atualizacoes necessarias de snapshot, se aplicavel.
      * Notas: manter idempotencia para eventos repetidos do dispositivo.
      */
+    @Transactional
     public RegisterCabinetEventResponse registerEvent(RegisterCabinetEventRequest request) {
         UUID cabinetAccessId = request.cabinetAccessId();
         String eventType = request.eventType().trim().toUpperCase();

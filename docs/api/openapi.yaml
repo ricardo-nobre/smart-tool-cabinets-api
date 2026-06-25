@@ -423,7 +423,7 @@ components:
         apiKey: { type: string }
       example:
         cabinetCode: CAB-001
-        apiKey: DEVKEY-CAB-001
+        apiKey: DEV-CAB-001
 
     DeviceAuthResponse:
       type: object
@@ -432,8 +432,8 @@ components:
         deviceToken: { type: string }
         expiresAt: { type: string, format: date-time }
       example:
-        deviceToken: DEVICE-TOKEN-1
-        expiresAt: 2026-04-16T18:30:00Z
+        deviceToken: DEV-TOKEN-CAB-001
+        expiresAt: 2026-06-25T18:30:00Z
 
     OperatorAuthRequest:
       type: object
@@ -458,7 +458,7 @@ components:
         operatorId: { type: string, format: uuid }
       example:
         cabinetCode: CAB-001
-        operatorId: 11111111-1111-1111-1111-111111111111
+        operatorId: 00000000-0000-0000-0000-000000000201
 
     OpenCabinetAccessResponse:
       type: object
@@ -480,9 +480,9 @@ components:
           items: { type: string }
       example:
         snapshotType: BEFORE
-        capturedAt: 2026-04-16T09:00:00Z
-        source: RFID_READER
-        observedTags: [TAG-1001, TAG-1002]
+        capturedAt: 2026-06-25T09:00:00Z
+        source: SIMULATOR
+        observedTags: [TAG-001, TAG-002, TAG-003]
 
     CreateSnapshotResponse:
       type: object
@@ -530,11 +530,11 @@ components:
         unknownTagsCount: { type: integer, format: int32 }
         discrepancyFlag: { type: boolean }
       example:
-        cabinetAccessId: 22222222-2222-2222-2222-222222222222
+        cabinetAccessId: 00000000-0000-0000-0000-000000000901
         status: CLOSED
-        closedAt: 2026-04-16T09:05:00Z
+        closedAt: 2026-06-25T09:05:00Z
         operationalResult: CLOSED_WITH_ASSIGNMENTS
-        assignmentsCreatedCount: 2
+        assignmentsCreatedCount: 1
         assignmentsReturnedCount: 0
         unknownTagsCount: 0
         discrepancyFlag: false
@@ -583,14 +583,14 @@ components:
         requireSupervisorReview: { type: boolean }
         allowExit: { type: boolean }
       example:
-        operatorId: 11111111-1111-1111-1111-111111111111
+        operatorId: 00000000-0000-0000-0000-000000000201
         pendingAssignments:
-          - assignmentId: 33333333-3333-3333-3333-333333333333
-            toolId: 44444444-4444-4444-4444-444444444444
-            tagCode: TAG-1001
-            toolDisplayName: Chave dinamométrica
+          - assignmentId: 00000000-0000-0000-0000-000000000902
+            toolId: 00000000-0000-0000-0000-000000001002
+            tagCode: TAG-002
+            toolDisplayName: Demo wrench
             originCabinetCode: CAB-001
-            assignedAt: 2026-04-16T09:03:00Z
+            assignedAt: 2026-06-25T09:03:00Z
             returnedAt: null
             status: ACTIVE
         pendingAssignmentsCount: 1
@@ -615,13 +615,13 @@ components:
           minItems: 1
           items: { type: string, format: uuid }
       example:
-        operatorId: 11111111-1111-1111-1111-111111111111
-        supervisorId: 55555555-5555-5555-5555-555555555555
+        operatorId: 00000000-0000-0000-0000-000000000201
+        supervisorId: 00000000-0000-0000-0000-000000000301
         reasonCode: TOOL_NOT_RETURNED
         reportText: Ferramenta não devolvida no final do turno; ocorrência registada para tratamento interno.
-        decisionAt: 2026-04-16T18:10:00Z
+        decisionAt: 2026-06-25T18:10:00Z
         allowExit: true
-        assignmentIds: [33333333-3333-3333-3333-333333333333]
+        assignmentIds: [00000000-0000-0000-0000-000000000902]
 
     CreateSupervisorResolutionResponse:
       type: object

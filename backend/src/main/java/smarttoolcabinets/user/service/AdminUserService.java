@@ -1,6 +1,7 @@
 package smarttoolcabinets.user.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import smarttoolcabinets.user.domain.User;
 import smarttoolcabinets.user.dto.AdminUserCreateRequest;
 import smarttoolcabinets.user.repository.UserRepository;
@@ -30,6 +31,7 @@ public class AdminUserService {
      * 4) Registar auditoria de criacao.
      * Notas: alinhar com estrategia final de seguranca.
      */
+    @Transactional
     public String createUser(AdminUserCreateRequest request) {
         String username = request.username().trim();
         if(userRepository.findByUsername(username).isPresent()){

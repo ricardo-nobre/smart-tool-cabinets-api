@@ -1,6 +1,7 @@
 package smarttoolcabinets.cabinet.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import smarttoolcabinets.cabinet.domain.Cabinet;
 import smarttoolcabinets.cabinet.dto.AdminCabinetCreateRequest;
 import smarttoolcabinets.cabinet.repository.CabinetRepository;
@@ -30,6 +31,7 @@ public class AdminCabinetService {
      * 4) Registar auditoria da operacao.
      * Notas: aplicar regras de ativacao inicial.
      */
+    @Transactional
     public String createCabinet(AdminCabinetCreateRequest request) {
         String code = request.code().trim();
         if(cabinetRepository.existsByCode(code)){

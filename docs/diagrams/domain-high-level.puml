@@ -1,34 +1,142 @@
-﻿@startmindmap
-* Domínio de custódia
-** Entidades centrais
-*** ToolAssignment
-**** Estado de custódia por operador
-**** Estados: ACTIVE, RETURNED, PENDING_REVIEW, RESOLVED
-*** CabinetAccess
-**** Interação local com armário
-**** Estado: OPEN ou CLOSED
-*** SupervisorResolution
-**** Decisão humana formal
-**** Campos obrigatórios: reasonCode, reportText, allowExit
-*** AuditLog
-**** Rastreabilidade transversal
-** Entidades de suporte
-*** User
-**** Perfis: OPERATOR, SUPERVISOR, ADMIN
-*** Tool
-**** tagCode único global
-**** typeCode e serialNumber opcional
-*** Cabinet
-**** Identificação física do armário
-*** InventorySnapshot
-**** Tipos: BEFORE, AFTER, EXTRA
-*** InventorySnapshotItem
-**** Tag observada reconhecida ou desconhecida
-*** CabinetEvent
-**** Eventos do dispositivo
-** Relações lógicas
-*** CabinetAccess agrega snapshots e eventos
-*** Delta BEFORE/AFTER atualiza ToolAssignment
-*** SupervisorResolution cobre uma ou mais ToolAssignments
-*** AuditLog regista ações sobre CabinetAccess, ToolAssignment e SupervisorResolution
-@endmindmap
+@startuml
+hide circle
+skinparam linetype ortho
+
+entity cabinet {
+  * id : uuid
+  --
+  code : varchar
+  name : varchar
+  location : varchar
+  active : boolean
+}
+
+entity app_user {
+  * id : uuid
+  --
+  username : varchar
+  full_name : varchar
+  role : varchar
+  pin_hash : varchar
+  nfc_uid : varchar
+  active : boolean
+}
+
+entity tool {
+  * id : uuid
+  --
+  cabinet_id : uuid
+  tag_code : varchar
+  display_name : varchar
+  type_code : int
+  serial_number : varchar
+  active : boolean
+}
+
+entity cabinet_access {
+  * id : uuid
+  --
+  cabinet_id : uuid
+  operator_id : uuid
+  status : varchar
+  opened_at : timestamptz
+  closed_at : timestamptz
+}
+
+entity inventory_snapshot {
+  * id : uuid
+  --
+  cabinet_access_id : uuid
+  snapshot_type : varchar
+  captured_at : timestamptz
+  source : varchar
+}
+
+entity inventory_snapshot_item {
+  * id : uuid
+  --
+  snapshot_id : uuid
+  tag_code : varchar
+  tool_id : uuid
+  recognized : boolean
+}
+
+entity tool_assignment {
+  * id : uuid
+  --
+  tool_id : uuid
+  operator_id : uuid
+  origin_cabinet_id : uuid
+  origin_cabinet_access_id : uuid
+  assigned_at : timestamptz
+  returned_at : timestamptz
+  returned_to_cabinet_id : uuid
+  returned_via_cabinet_access_id : uuid
+  status : varchar
+  pending_end_of_day : boolean
+}
+
+entity supervisor_resolution {
+  * id : uuid
+  --
+  operator_id : uuid
+  supervisor_id : uuid
+  reason_code : varchar
+  report_text : text
+  decision_at : timestamptz
+  allow_exit : boolean
+}
+
+entity supervisor_resolution_assignment {
+  * supervisor_resolution_id : uuid
+  * tool_assignment_id : uuid
+}
+
+entity cabinet_event {
+  * id : uuid
+  --
+  cabinet_access_id : uuid
+  event_type : varchar
+  payload_json : text
+  occurred_at : timestamptz
+}
+
+entity audit_log {
+  * id : uuid
+  --
+  actor_type : varchar
+  actor_ref : varchar
+  action : varchar
+  entity_type : varchar
+  entity_id : uuid
+  details_json : text
+}
+
+cabinet ||--o{ tool : contains
+cabinet ||--o{ cabinet_access : receives
+app_user ||--o{ cabinet_access : operates
+cabinet_access ||--o{ inventory_snapshot : has
+inventory_snapshot ||--o{ inventory_snapshot_item : contains
+tool |o--o{ inventory_snapshot_item : recognized_tool
+
+tool ||--o{ tool_assignment : assigned_as
+app_user ||--o{ tool_assignment : custodies
+cabinet ||--o{ tool_assignment : origin
+cabinet_access ||--o{ tool_assignment : origin_access
+cabinet |o--o{ tool_assignment : return_cabinet
+cabinet_access |o--o{ tool_assignment : return_access
+
+cabinet_access ||--o{ cabinet_event : emits
+
+app_user ||--o{ supervisor_resolution : operator
+app_user ||--o{ supervisor_resolution : supervisor
+supervisor_resolution ||--o{ supervisor_resolution_assignment : resolves
+tool_assignment ||--o{ supervisor_resolution_assignment : covered_by
+
+note right of audit_log
+  Transversal audit entity.
+  entity_type/entity_id identify
+  the affected domain object
+  without a hard foreign key.
+end note
+@enduml

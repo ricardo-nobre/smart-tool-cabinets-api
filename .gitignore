@@ -29,6 +29,12 @@ application-local.properties
 application-dev-local.yml
 application-dev-local.properties
 
+# Local reports / non-code project files
+.42c/
+Relatórios e ficheiros/
+*.pdf
+*.docx
+
 # Database / runtime files
 *.db
 *.sqlite
