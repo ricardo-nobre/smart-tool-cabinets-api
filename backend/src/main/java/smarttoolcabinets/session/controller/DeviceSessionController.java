@@ -41,12 +41,12 @@ public class DeviceSessionController {
      * O fecho fisico do armario ocorre sempre.
      */
     @PostMapping("/{cabinetAccessId}/close")
-    public ResponseEntity<CloseSessionResponse> close(@PathVariable String cabinetAccessId){
+    public ResponseEntity<CloseSessionResponse> close(@PathVariable("cabinetAccessId") String cabinetAccessId){
         return ResponseEntity.ok(deviceSessionService.closeSession(cabinetAccessId));
     }
 
     @PostMapping("/{cabinetAccessId}/snapshots")
-    public ResponseEntity<CreateSnapshotResponse> createSnapshot(@PathVariable String cabinetAccessId, @Valid @RequestBody CreateSnapshotRequest request) {
+    public ResponseEntity<CreateSnapshotResponse> createSnapshot(@PathVariable("cabinetAccessId") String cabinetAccessId, @Valid @RequestBody CreateSnapshotRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(inventoryService.createSnapshot(cabinetAccessId, request));
     }
 }

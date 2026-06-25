@@ -24,14 +24,14 @@ public class OperatorController {
 
     @GetMapping("/{operatorId}/tool-assignments")
     public ResponseEntity<OperatorToolAssignmentsResponse> getToolAssignments(
-            @PathVariable UUID operatorId,
-            @RequestParam(required = false) String status
+            @PathVariable("operatorId") UUID operatorId,
+            @RequestParam(name = "status", required = false) String status
     ) {
         return ResponseEntity.ok(operatorQueryService.getAssignments(operatorId, status));
     }
 
     @GetMapping("/{operatorId}/end-of-day-check")
-    public ResponseEntity<EndOfDayCheckResponse> endOfDayCheck(@PathVariable UUID operatorId) {
+    public ResponseEntity<EndOfDayCheckResponse> endOfDayCheck(@PathVariable("operatorId") UUID operatorId) {
         return ResponseEntity.ok(operatorQueryService.endOfDayCheck(operatorId));
     }
 }

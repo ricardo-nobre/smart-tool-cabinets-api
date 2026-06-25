@@ -65,7 +65,7 @@ $endOfDay = Invoke-JsonApi -Method "GET" -Path "/api/operators/$($operatorAuth.o
 
 Write-Host "CabinetAccess: $($access.cabinetAccessId)"
 Write-Host "Close result: $($close.operationalResult)"
-Write-Host "Pending assignments: $($endOfDay.pendingAssignmentsCount)"
+Write-Host "Pending assignments before resolution: $($endOfDay.pendingAssignmentsCount)"
 
 if ($endOfDay.pendingAssignmentsCount -gt 0) {
     $assignmentIds = @($endOfDay.pendingAssignments | ForEach-Object { $_.assignmentId })
@@ -82,4 +82,7 @@ if ($endOfDay.pendingAssignmentsCount -gt 0) {
     Write-Host "SupervisorResolution: $($resolution.resolutionId)"
 }
 
-$endOfDay | ConvertTo-Json -Depth 10
+$endOfDayAfterResolution = Invoke-JsonApi -Method "GET" -Path "/api/operators/$($operatorAuth.operatorId)/end-of-day-check" -Headers $operatorHeaders
+Write-Host "Pending assignments after resolution: $($endOfDayAfterResolution.pendingAssignmentsCount)"
+
+$endOfDayAfterResolution | ConvertTo-Json -Depth 10

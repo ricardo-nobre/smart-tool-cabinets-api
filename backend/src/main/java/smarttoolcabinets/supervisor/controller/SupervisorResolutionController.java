@@ -35,7 +35,7 @@ public class SupervisorResolutionController {
 
     @GetMapping
     public ResponseEntity<SupervisorResolutionListResponse> list(
-            @RequestParam(required = false) UUID operatorId
+            @RequestParam(name = "operatorId", required = false) UUID operatorId
     ) {
         return ResponseEntity.ok(supervisorResolutionService.list(operatorId));
     }
