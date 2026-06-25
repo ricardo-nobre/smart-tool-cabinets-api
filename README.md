@@ -83,8 +83,14 @@ scripts\dev\run-simulator-missing-tool.cmd
 
 The scripts call the real HTTP API and exercise two demonstrator flows:
 
-- normal flow: open access, submit BEFORE/AFTER snapshots, close and list assignments;
-- missing-tool flow: create an active pending assignment, run end-of-day check and create a supervisor resolution.
+- normal flow: operator checks out a tool, creating an active ToolAssignment;
+- missing-tool flow: an active assignment remains pending, end-of-day check detects it, and a supervisor resolution is created.
+
+For repeated local demonstrations, reset the database first so previous active assignments do not affect the next run:
+
+```powershell
+scripts\dev\reset-db.cmd
+```
 
 ## Useful Commands
 
@@ -131,8 +137,7 @@ Known limitations:
 
 ## Next Steps
 
-- add integration tests for close creating ToolAssignments and end-of-day pending checks;
+- render the EA diagram and include it in the final report;
 - align internal `Session` naming to `CabinetAccess`;
-- update the EA diagram with cardinalities;
 - review OpenAPI examples against the final demo flow;
 - improve credential handling if time allows.
