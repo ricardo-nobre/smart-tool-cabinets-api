@@ -24,7 +24,7 @@ Objetivo: terminar o projeto com dominio tecnico real pelo aluno, mantendo o rep
 - Docker Compose valida a configuracao.
 - PostgreSQL sobe em Docker e fica `healthy`.
 - Backend arranca com profile `dev`.
-- Flyway valida 6 migrations.
+- Flyway valida 2 migrations.
 - Swagger esta acessivel em `/swagger-ui.html`, `/swagger-ui/index.html` e `/v3/api-docs`.
 - Scripts HTTP de demo executam contra a API.
 
@@ -310,7 +310,7 @@ Guardar evidencias de:
 
 - `mvn test`.
 - Docker Compose.
-- Flyway V1-V6.
+- Flyway V1-V2.
 - Swagger.
 - normal-flow.
 - return-flow.
@@ -553,8 +553,8 @@ Conceitos:
 
 - Migrations versionadas.
 - V1 cria schema.
-- V6 cria seed demo.
-- V5 corrigiu `audit_log`.
+- V1 cria o schema final atual.
+- V2 cria o seed demo.
 - `flyway_schema_history` mostra o que foi aplicado.
 
 ### Spring Boot

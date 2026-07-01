@@ -28,8 +28,6 @@ entity tool {
   cabinet_id : uuid
   tag_code : varchar
   display_name : varchar
-  type_code : int
-  serial_number : varchar
   active : boolean
 }
 
@@ -73,7 +71,6 @@ entity tool_assignment {
   returned_to_cabinet_id : uuid
   returned_via_cabinet_access_id : uuid
   status : varchar
-  pending_end_of_day : boolean
 }
 
 entity supervisor_resolution {
@@ -109,7 +106,6 @@ entity audit_log {
   action : varchar
   entity_type : varchar
   entity_id : uuid
-  details_json : text
 }
 
 cabinet ||--o{ tool : contains

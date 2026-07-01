@@ -42,7 +42,7 @@ class OperatorQueryServiceTest {
         String suffix = UUID.randomUUID().toString().replace("-", "").toUpperCase();
         Cabinet cabinet = cabinetRepository.save(Cabinet.newCabinet("CAB-EOD-" + suffix, "Cabinet EOD", "Lab"));
         User operator = userRepository.save(User.newUser("operator-eod-" + suffix, "Operator EOD", "OPERATOR", "4321-" + suffix, null));
-        Tool tool = toolRepository.save(Tool.newTool(cabinet.getId(), "TAG-EOD-" + suffix, "Tool EOD", 1, null));
+        Tool tool = toolRepository.save(Tool.newTool(cabinet.getId(), "TAG-EOD-" + suffix, "Tool EOD"));
         ToolAssignment assignment = toolAssignmentRepository.save(ToolAssignment.createActive(
                 tool.getId(),
                 operator.getId(),

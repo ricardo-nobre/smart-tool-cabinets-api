@@ -31,9 +31,6 @@ public class Cabinet {
     @Column(length = 255)
     private String location;
 
-    @Column(name = "api_key_hash", length = 255)
-    private String apiKeyHash;
-
     @Column(nullable = false)
     private boolean active;
 
@@ -50,7 +47,6 @@ public class Cabinet {
         cabinet.code = code;
         cabinet.name = name;
         cabinet.location = location;
-        cabinet.apiKeyHash = null;
         cabinet.active = true;
         cabinet.createdAt = OffsetDateTime.now();
         return cabinet;

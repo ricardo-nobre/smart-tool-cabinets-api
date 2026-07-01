@@ -397,13 +397,11 @@ components:
 
     AdminToolCreateRequest:
       type: object
-      required: [cabinetId, tagCode, displayName, typeCode]
+      required: [cabinetId, tagCode, displayName]
       properties:
         cabinetId: { type: string, format: uuid }
         tagCode: { type: string }
         displayName: { type: string }
-        typeCode: { type: integer, format: int32 }
-        serialNumber: { type: string, nullable: true }
 
     AdminUserCreateRequest:
       type: object

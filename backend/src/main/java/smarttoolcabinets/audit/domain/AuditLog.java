@@ -41,9 +41,6 @@ public class AuditLog {
     @Column(name = "entity_id")
     private UUID entityId;
 
-    @Column(name = "details_json", columnDefinition = "TEXT")
-    private String detailsJson;
-
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -51,7 +48,7 @@ public class AuditLog {
         // JPA
     }
 
-    public static AuditLog newEntry(String actorType, String actorRef, String action, AuditEntityType entityType, UUID entityId, String detailsJson) {
+    public static AuditLog newEntry(String actorType, String actorRef, String action, AuditEntityType entityType, UUID entityId) {
         AuditLog auditLog = new AuditLog();
         auditLog.id = UUID.randomUUID();
         auditLog.actorType = Objects.requireNonNull(actorType, "actorType is required");
@@ -59,7 +56,6 @@ public class AuditLog {
         auditLog.action = Objects.requireNonNull(action, "action is required");
         auditLog.entityType = Objects.requireNonNull(entityType, "entityType is required");
         auditLog.entityId = entityId;
-        auditLog.detailsJson = detailsJson;
         auditLog.createdAt = OffsetDateTime.now();
         return auditLog;
     }

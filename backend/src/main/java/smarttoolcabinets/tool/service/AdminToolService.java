@@ -50,8 +50,7 @@ public class AdminToolService {
         if(toolRepository.existsByTagCode(code)) {
             throw new IllegalArgumentException("Tool tag already exists: " + code);
         }
-        String serialNumber = request.serialNumber() == null ? null : request.serialNumber().trim();
-        Tool tool = Tool.newTool(uuid, code, request.displayName().trim(), request.typeCode(), serialNumber);
+        Tool tool = Tool.newTool(uuid, code, request.displayName().trim());
         Tool t = toolRepository.save(tool);
         auditService.logAction("admin", "create_tool", AuditEntityType.TOOL, t.getId().toString());
         return t.getId().toString();

@@ -13,9 +13,7 @@ import java.util.UUID;
 public record AdminToolCreateRequest(
         @NotNull UUID cabinetId,
         @NotBlank String tagCode,
-        @NotBlank String displayName,
-        @NotNull Integer typeCode,
-        String serialNumber
+        @NotBlank String displayName
 ) {
 }
 

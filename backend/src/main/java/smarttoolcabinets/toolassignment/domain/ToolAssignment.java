@@ -45,9 +45,6 @@ public class ToolAssignment {
     @Column(nullable = false, length = 32)
     private String status;
 
-    @Column(name = "pending_end_of_day", nullable = false)
-    private boolean pendingEndOfDay;
-
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -70,7 +67,6 @@ public class ToolAssignment {
         assignment.originCabinetAccessId = originCabinetAccessId;
         assignment.assignedAt = assignedAt;
         assignment.status = "ACTIVE";
-        assignment.pendingEndOfDay = false;
         assignment.createdAt = OffsetDateTime.now();
         return assignment;
     }
@@ -108,17 +104,14 @@ public class ToolAssignment {
         this.returnedViaCabinetAccessId = returnedViaCabinetAccessId;
         this.returnedAt = returnedAt;
         this.status = "RETURNED";
-        this.pendingEndOfDay = false;
     }
 
     public void markPendingReview() {
         this.status = "PENDING_REVIEW";
-        this.pendingEndOfDay = true;
     }
 
     public void markResolved() {
         this.status = "RESOLVED";
-        this.pendingEndOfDay = false;
     }
 }
 

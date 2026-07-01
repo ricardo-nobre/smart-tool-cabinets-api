@@ -48,8 +48,8 @@ class DeviceCabinetAccessServiceTest {
         String suffix = UUID.randomUUID().toString().replace("-", "").toUpperCase();
         Cabinet cabinet = cabinetRepository.save(Cabinet.newCabinet("CAB-" + suffix, "Cabinet " + suffix, "Lab"));
         User operator = userRepository.save(User.newUser("operator-" + suffix, "Operator Test", "OPERATOR", "1234-" + suffix, null));
-        Tool toolA = toolRepository.save(Tool.newTool(cabinet.getId(), "TAG-A-" + suffix, "Tool A", 1, null));
-        Tool toolB = toolRepository.save(Tool.newTool(cabinet.getId(), "TAG-B-" + suffix, "Tool B", 1, null));
+        Tool toolA = toolRepository.save(Tool.newTool(cabinet.getId(), "TAG-A-" + suffix, "Tool A"));
+        Tool toolB = toolRepository.save(Tool.newTool(cabinet.getId(), "TAG-B-" + suffix, "Tool B"));
 
         var opened = deviceCabinetAccessService.openCabinetAccess(new OpenCabinetAccessRequest(cabinet.getCode(), operator.getId()));
 

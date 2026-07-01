@@ -30,7 +30,7 @@ public class AdminToolController {
 
     /**
      * Objetivo: criar ferramenta por endpoint admin.
-     * Inputs esperados: cabinetId, tagCode, displayName, typeCode e serialNumber opcional.
+     * Inputs esperados: cabinetId, tagCode e displayName.
      * Output esperado: id da ferramenta criada.
      * Passos logicos a implementar:
      * 1) Validar payload.

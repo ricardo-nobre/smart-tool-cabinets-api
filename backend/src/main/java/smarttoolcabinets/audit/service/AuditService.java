@@ -54,7 +54,7 @@ public class AuditService {
         String actorType = resolveActorType(normalizedActor);
         String actorRef = resolveActorRef(normalizedActor);
 
-        AuditLog auditLog = AuditLog.newEntry(actorType, actorRef, action, parsedEntityType, id, "{}");
+        AuditLog auditLog = AuditLog.newEntry(actorType, actorRef, action, parsedEntityType, id);
         auditLogRepository.save(auditLog);
     }
 

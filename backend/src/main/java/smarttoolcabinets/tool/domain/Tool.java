@@ -31,12 +31,6 @@ public class Tool {
     @Column(name = "display_name", nullable = false, length = 128)
     private String displayName;
 
-    @Column(name = "type_code", nullable = false)
-    private int typeCode;
-
-    @Column(name = "serial_number", length = 128)
-    private String serialNumber;
-
     @Column(nullable = false)
     private boolean active;
 
@@ -47,14 +41,12 @@ public class Tool {
 
     }
 
-    public static Tool newTool(UUID cabinetId, String tagCode, String displayName, int typeCode, String serialNumber) {
+    public static Tool newTool(UUID cabinetId, String tagCode, String displayName) {
         Tool tool = new Tool();
         tool.id = UUID.randomUUID();
         tool.cabinetId = cabinetId;
         tool.tagCode = tagCode;
         tool.displayName = displayName;
-        tool.typeCode = typeCode;
-        tool.serialNumber = serialNumber;
         tool.active = true;
         tool.createdAt = OffsetDateTime.now();
         return tool;
