@@ -6,8 +6,6 @@ import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Teste de arranque do contexto Spring.
- *
- * Existe para garantir que o skeleton tecnico sobe sem erros basicos.
  */
 @SpringBootTest
 @ActiveProfiles("test")

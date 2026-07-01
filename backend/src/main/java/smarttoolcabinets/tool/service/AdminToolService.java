@@ -52,7 +52,13 @@ public class AdminToolService {
         }
         Tool tool = Tool.newTool(uuid, code, request.displayName().trim());
         Tool t = toolRepository.save(tool);
-        auditService.logAction("admin", "create_tool", AuditEntityType.TOOL, t.getId().toString());
+        auditService.logAction(
+                "ADMIN",
+                "admin",
+                "CREATE_TOOL",
+                AuditEntityType.TOOL,
+                t.getId()
+        );
         return t.getId().toString();
     }
 }

@@ -5,15 +5,18 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.OffsetDateTime;
+import java.util.HexFormat;
 import java.util.UUID;
 
 /**
  * Entidade base de armario inteligente.
  *
  * Serve para representar o dispositivo fisico no dominio e persistencia.
- * Relaciona-se com sessoes e ferramentas.
- * Evolucao futura: regras de ciclo de vida (ativacao/desativacao) e seguranca da API key.
+ * Relaciona-se com CabinetAccess e ferramentas.
  */
 @Entity
 @Table(name = "cabinet")
@@ -31,6 +34,9 @@ public class Cabinet {
     @Column(length = 255)
     private String location;
 
+    @Column(name = "api_key_hash", nullable = false, length = 255)
+    private String apiKeyHash;
+
     @Column(nullable = false)
     private boolean active;
 
@@ -47,6 +53,7 @@ public class Cabinet {
         cabinet.code = code;
         cabinet.name = name;
         cabinet.location = location;
+        cabinet.apiKeyHash = hashApiKey("DEV-" + code);
         cabinet.active = true;
         cabinet.createdAt = OffsetDateTime.now();
         return cabinet;
@@ -62,6 +69,20 @@ public class Cabinet {
 
     public boolean isActive() {
         return active;
+    }
+
+    public String getApiKeyHash() {
+        return apiKeyHash;
+    }
+
+    public static String hashApiKey(String apiKey) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hashed = digest.digest(apiKey.getBytes(StandardCharsets.UTF_8));
+            return HexFormat.of().formatHex(hashed);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 is not available", e);
+        }
     }
 }
 

@@ -151,10 +151,11 @@ public class InventoryService {
         inventorySnapshotItemRepository.saveAll(items);
 
         auditService.logAction(
-                "CABINET_ACCESS:" + parsedCabinetAccessId,
+                "CABINET_ACCESS",
+                parsedCabinetAccessId.toString(),
                 "CREATE_INVENTORY_SNAPSHOT",
                 AuditEntityType.INVENTORY_SNAPSHOT,
-                i.getId().toString()
+                i.getId()
         );
 
 

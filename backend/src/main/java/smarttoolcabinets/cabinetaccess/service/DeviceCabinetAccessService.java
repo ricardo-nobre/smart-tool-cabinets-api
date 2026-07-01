@@ -103,10 +103,11 @@ public class DeviceCabinetAccessService {
           CabinetAccess saved = cabinetAccessRepository.save(cabinetAccess);
 
           auditService.logAction(
-                  "DEVICE:" + cabinet.getCode(),
+                  "DEVICE",
+                  cabinet.getCode(),
                   "OPEN_CABINET_ACCESS",
                   AuditEntityType.CABINET_ACCESS,
-                  saved.getId().toString()
+                  saved.getId()
           );
 
           return new OpenCabinetAccessResponse(saved.getId(), saved.getStatus(), saved.getOpenedAt());
@@ -205,13 +206,17 @@ public class DeviceCabinetAccessService {
             discrepancyFlag = true;
         }
 
+        var cabinet = cabinetRepository.findById(s.getCabinetId())
+                .orElseThrow(() -> new IllegalArgumentException("cabinet not found: " + s.getCabinetId()));
+
         s.close();
         CabinetAccess saved = cabinetAccessRepository.save(s);
         auditService.logAction(
-                "CABINET_ACCESS:" + saved.getId(),
+                "DEVICE",
+                cabinet.getCode(),
                 "CLOSE_CABINET_ACCESS",
                 AuditEntityType.CABINET_ACCESS,
-                saved.getId().toString()
+                saved.getId()
         );
 
         String operationalResult;

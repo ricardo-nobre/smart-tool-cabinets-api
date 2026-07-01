@@ -1,8 +1,9 @@
-INSERT INTO cabinet (id, code, name, location, active)
-VALUES ('00000000-0000-0000-0000-000000000001', 'CAB-001', 'Cabinet 001', 'Lab A', TRUE)
+INSERT INTO cabinet (id, code, name, location, api_key_hash, active)
+VALUES ('00000000-0000-0000-0000-000000000001', 'CAB-001', 'Cabinet 001', 'Lab A', 'dae68e3b4d111160cb7d41596b384820ff33650bad4b211f27d0fd5e430fd7b7', TRUE)
 ON CONFLICT (code) DO UPDATE
 SET name = EXCLUDED.name,
     location = EXCLUDED.location,
+    api_key_hash = EXCLUDED.api_key_hash,
     active = EXCLUDED.active;
 
 INSERT INTO app_user (id, username, full_name, role, active, pin_hash, nfc_uid)

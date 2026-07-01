@@ -88,10 +88,11 @@ public class SupervisorResolutionService {
         supervisorResolutionAssignmentRepository.saveAll(links);
 
         auditService.logAction(
-                "SUPERVISOR:" + request.supervisorId(),
+                "SUPERVISOR",
+                request.supervisorId().toString(),
                 "CREATE_SUPERVISOR_RESOLUTION",
                 AuditEntityType.SUPERVISOR_RESOLUTION,
-                saved.getId().toString()
+                saved.getId()
         );
 
         return toResponse(saved, request.assignmentIds());

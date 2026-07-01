@@ -68,7 +68,13 @@ public class DeviceEventService {
 
         CabinetEvent cabinetEvent = CabinetEvent.cabinetEvent(cabinetAccessId, eventType, payload, request.occurredAt());
         CabinetEvent e = cabinetEventRepository.save(cabinetEvent);
-        auditService.logAction("CABINET_ACCESS:" + cabinetAccessId, "REGISTER_EVENT:" + eventType, AuditEntityType.EVENT, e.getId().toString());
+        auditService.logAction(
+                "DEVICE",
+                access.getCabinetId().toString(),
+                "REGISTER_EVENT:" + eventType,
+                AuditEntityType.EVENT,
+                e.getId()
+        );
         return new RegisterCabinetEventResponse(e.getId(), "REGISTERED");
 
     }

@@ -40,7 +40,8 @@ public class DeviceAuthService {
         if (request.apiKey().length() > 255 || request.cabinetCode().length() > 64) {
             throw new IllegalArgumentException("Credenciais invalidas");
         }
-        Optional<Cabinet> cabinetOpt = cabinetRepository.findByCode(request.cabinetCode());
+        String cabinetCode = request.cabinetCode().trim();
+        Optional<Cabinet> cabinetOpt = cabinetRepository.findByCode(cabinetCode);
         if (cabinetOpt.isEmpty()) {
             throw new BadCredentialsException("Credenciais invalidas");
         }
@@ -48,8 +49,8 @@ public class DeviceAuthService {
         if(!cabinet.isActive()) {
             throw new IllegalStateException("Cabinet inativo");
         }
-        String expectedApiKey = "DEV-" + cabinet.getCode();
-        if (!request.apiKey().equals(expectedApiKey)) {
+        String requestApiKeyHash = Cabinet.hashApiKey(request.apiKey().trim());
+        if (!requestApiKeyHash.equals(cabinet.getApiKeyHash())) {
             throw new BadCredentialsException("Credenciais invalidas");
         }
         String tempToken = "DEV-TOKEN-" + cabinet.getCode();

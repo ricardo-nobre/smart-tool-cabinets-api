@@ -14,9 +14,6 @@ import java.util.Map;
 
 /**
  * Handler global de excecoes da API.
- *
- * Esta classe existe para devolver erros consistentes durante a fase skeleton.
- * O mapeamento de excecoes de negocio deve ser expandido manualmente.
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
