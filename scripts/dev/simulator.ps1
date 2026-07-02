@@ -70,26 +70,38 @@ function Invoke-CabinetAccessFlow {
         [string[]]$AfterTags
     )
 
+    $access = $null
     $access = Invoke-JsonApi -Method "POST" -Path "/api/device/cabinet-accesses" -Headers $DeviceHeaders -Body @{
         cabinetCode = $CabinetCode
         operatorId = $OperatorId
     }
 
-    Invoke-JsonApi -Method "POST" -Path "/api/device/cabinet-accesses/$($access.cabinetAccessId)/snapshots" -Headers $DeviceHeaders -Body @{
-        snapshotType = "BEFORE"
-        capturedAt = [DateTimeOffset]::UtcNow.ToString("o")
-        source = "SIMULATOR"
-        observedTags = $BeforeTags
-    } | Out-Null
+    try {
+        Invoke-JsonApi -Method "POST" -Path "/api/device/cabinet-accesses/$($access.cabinetAccessId)/snapshots" -Headers $DeviceHeaders -Body @{
+            snapshotType = "BEFORE"
+            capturedAt = [DateTimeOffset]::UtcNow.ToString("o")
+            source = "SIMULATOR"
+            observedTags = $BeforeTags
+        } | Out-Null
 
-    Invoke-JsonApi -Method "POST" -Path "/api/device/cabinet-accesses/$($access.cabinetAccessId)/snapshots" -Headers $DeviceHeaders -Body @{
-        snapshotType = "AFTER"
-        capturedAt = [DateTimeOffset]::UtcNow.ToString("o")
-        source = "SIMULATOR"
-        observedTags = $AfterTags
-    } | Out-Null
+        Invoke-JsonApi -Method "POST" -Path "/api/device/cabinet-accesses/$($access.cabinetAccessId)/snapshots" -Headers $DeviceHeaders -Body @{
+            snapshotType = "AFTER"
+            capturedAt = [DateTimeOffset]::UtcNow.ToString("o")
+            source = "SIMULATOR"
+            observedTags = $AfterTags
+        } | Out-Null
 
-    $close = Invoke-JsonApi -Method "POST" -Path "/api/device/cabinet-accesses/$($access.cabinetAccessId)/close" -Headers $DeviceHeaders
+        $close = Invoke-JsonApi -Method "POST" -Path "/api/device/cabinet-accesses/$($access.cabinetAccessId)/close" -Headers $DeviceHeaders
+    } catch {
+        if ($null -ne $access) {
+            try {
+                Invoke-JsonApi -Method "POST" -Path "/api/device/cabinet-accesses/$($access.cabinetAccessId)/close" -Headers $DeviceHeaders | Out-Null
+            } catch {
+                Write-Host "Cleanup warning: could not close cabinet access $($access.cabinetAccessId)."
+            }
+        }
+        throw
+    }
 
     [pscustomobject]@{
         Access = $access

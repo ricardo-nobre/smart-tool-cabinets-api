@@ -102,10 +102,6 @@ public class InventoryService {
                 .distinct()
                 .toList();
 
-        if (normalizedTags.isEmpty()) {
-            throw new IllegalArgumentException("observedTags must contain at least one non-blank tag");
-        }
-
         List<Tool> matchedTools = toolRepository.findByTagCodeIn(normalizedTags);
 
         Map<String, UUID> toolIdByTag = matchedTools.stream()
@@ -142,6 +138,5 @@ public class InventoryService {
         return new CreateSnapshotResponse(i.getId(), recognizedTags);
     }
 }
-
 
 

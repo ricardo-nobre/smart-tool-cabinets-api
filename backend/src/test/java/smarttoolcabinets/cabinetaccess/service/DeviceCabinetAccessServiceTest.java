@@ -132,4 +132,34 @@ class DeviceCabinetAccessServiceTest {
         assertThat(returnedAssignment).isPresent();
         assertThat(returnedAssignment.get().getReturnedAt()).isNotNull();
     }
+
+    @Test
+    void closeCreatesActiveAssignmentWhenAfterSnapshotIsEmpty() {
+        String suffix = UUID.randomUUID().toString().replace("-", "").toUpperCase();
+        Cabinet cabinet = cabinetRepository.save(Cabinet.newCabinet("CAB-" + suffix, "Cabinet " + suffix, "Lab"));
+        User operator = userRepository.save(User.newUser("operator-" + suffix, "Operator Test", "OPERATOR", "1234-" + suffix, null));
+        Tool tool = toolRepository.save(Tool.newTool(cabinet.getId(), "TAG-ONLY-" + suffix, "Only Tool"));
+
+        var opened = deviceCabinetAccessService.openCabinetAccess(new OpenCabinetAccessRequest(cabinet.getCode(), operator.getId()));
+
+        inventoryService.createSnapshot(opened.cabinetAccessId().toString(), new CreateSnapshotRequest(
+                "BEFORE",
+                OffsetDateTime.now(),
+                "TEST",
+                List.of(tool.getTagCode())
+        ));
+        inventoryService.createSnapshot(opened.cabinetAccessId().toString(), new CreateSnapshotRequest(
+                "AFTER",
+                OffsetDateTime.now(),
+                "TEST",
+                List.of()
+        ));
+
+        var closed = deviceCabinetAccessService.closeCabinetAccess(opened.cabinetAccessId().toString());
+
+        assertThat(closed.operationalResult()).isEqualTo("CLOSED_WITH_ASSIGNMENTS");
+        assertThat(closed.assignmentsCreatedCount()).isEqualTo(1);
+        assertThat(closed.discrepancyFlag()).isFalse();
+        assertThat(toolAssignmentRepository.findByToolIdAndStatus(tool.getId(), ToolAssignmentStatus.ACTIVE)).isPresent();
+    }
 }
