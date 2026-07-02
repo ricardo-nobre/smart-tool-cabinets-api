@@ -78,13 +78,18 @@ With PostgreSQL and the backend running:
 
 ```powershell
 scripts\dev\run-simulator-normal.cmd
+scripts\dev\run-simulator-return-tool.cmd
 scripts\dev\run-simulator-missing-tool.cmd
+scripts\dev\run-simulator-all.cmd
 ```
 
 The scripts call the real HTTP API and exercise two demonstrator flows:
 
 - normal flow: operator checks out a tool, creating an active ToolAssignment;
+- return-tool flow: operator checks out a tool and then returns it in a second CabinetAccess;
 - missing-tool flow: an active assignment remains pending, end-of-day check detects it, and a supervisor resolution is created.
+
+The `.cmd` files are shortcuts over `scripts/dev/simulator.ps1`, which accepts `normal`, `return-tool`, `missing-tool` and `all` scenarios.
 
 For repeated local demonstrations, reset the database first so previous active assignments do not affect the next run:
 

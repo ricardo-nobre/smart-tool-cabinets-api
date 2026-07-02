@@ -1,3 +1,3 @@
 @echo off
 setlocal
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0simulator-normal.ps1"
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0simulator.ps1" -Scenario normal
