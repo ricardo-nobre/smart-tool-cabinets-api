@@ -87,6 +87,7 @@ scripts\dev\run-simulator-normal.cmd
 scripts\dev\run-simulator-return-tool.cmd
 scripts\dev\run-simulator-missing-tool.cmd
 scripts\dev\run-simulator-all.cmd
+scripts\dev\run-simulator-interactive.cmd
 ```
 
 The scripts call the real HTTP API and exercise two demonstrator flows:
@@ -95,7 +96,7 @@ The scripts call the real HTTP API and exercise two demonstrator flows:
 - return-tool flow: operator checks out a tool and then returns it in a second CabinetAccess;
 - missing-tool flow: an active assignment remains pending, end-of-day check detects it, and a supervisor resolution is created.
 
-The `.cmd` files are shortcuts over `scripts/dev/simulator.ps1`, which accepts `normal`, `return-tool`, `missing-tool` and `all` scenarios.
+The `.cmd` files are shortcuts over `scripts/dev/simulator.ps1`, which accepts `normal`, `return-tool`, `missing-tool`, `all` and `interactive` scenarios.
 
 The same flow can also be exercised through the browser simulator at `/simulator.html`.
 
