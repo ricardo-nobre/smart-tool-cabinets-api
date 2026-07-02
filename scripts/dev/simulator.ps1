@@ -276,6 +276,7 @@ function Select-FromList {
 function Get-InteractiveCabinets {
     @(
         [pscustomobject]@{
+            Id = "00000000-0000-0000-0000-000000000011"
             Code = "CAB-WRENCH"
             ApiKey = "DEV-CAB-WRENCH"
             Name = "Wrench Cabinet"
@@ -288,6 +289,7 @@ function Get-InteractiveCabinets {
             DeviceHeaders = $null
         },
         [pscustomobject]@{
+            Id = "00000000-0000-0000-0000-000000000012"
             Code = "CAB-SCREW"
             ApiKey = "DEV-CAB-SCREW"
             Name = "Screwdriver Cabinet"
@@ -300,6 +302,7 @@ function Get-InteractiveCabinets {
             DeviceHeaders = $null
         },
         [pscustomobject]@{
+            Id = "00000000-0000-0000-0000-000000000013"
             Code = "CAB-MEASURE"
             ApiKey = "DEV-CAB-MEASURE"
             Name = "Measuring Cabinet"
@@ -373,11 +376,10 @@ function Start-InteractiveDay {
     }
 }
 
-function Show-AdminFunctions {
+function Show-AdminState {
     param([object[]]$Cabinets)
 
     Write-Host ""
-    Write-Host "Admin functions"
     Write-Host "Demo setup currently available:"
     foreach ($cabinet in $Cabinets) {
         Write-Host "  $($cabinet.Name) ($($cabinet.Code))"
@@ -386,7 +388,125 @@ function Show-AdminFunctions {
         }
     }
     Write-Host ""
-    Write-Host "These are seeded through Flyway V2 for the simulator."
+    Write-Host "Initial demo cabinets/tools are seeded through Flyway V2; admin additions are created through the API."
+}
+
+function Add-InteractiveCabinet {
+    param(
+        [object[]]$Cabinets,
+        [hashtable]$AdminHeaders
+    )
+
+    $code = Read-Host "Cabinet code, for example CAB-DRILL"
+    if ([string]::IsNullOrWhiteSpace($code)) {
+        Write-Host "Cancelled."
+        return @($Cabinets)
+    }
+
+    $name = Read-Host "Cabinet name"
+    if ([string]::IsNullOrWhiteSpace($name)) {
+        Write-Host "Cancelled."
+        return @($Cabinets)
+    }
+
+    $location = Read-Host "Location [Workshop A]"
+    if ([string]::IsNullOrWhiteSpace($location)) {
+        $location = "Workshop A"
+    }
+
+    $code = $code.Trim().ToUpperInvariant()
+    $name = $name.Trim()
+    $location = $location.Trim()
+
+    $response = Invoke-JsonApi -Method "POST" -Path "/api/admin/cabinets" -Headers $AdminHeaders -Body @{
+        code = $code
+        name = $name
+        location = $location
+    }
+
+    $newCabinet = [pscustomobject]@{
+        Id = $response.cabinetId
+        Code = $code
+        ApiKey = "DEV-$code"
+        Name = $name
+        Tools = @()
+        PresentTags = @()
+        DeviceHeaders = $null
+    }
+
+    Write-Host "Created cabinet $name ($code). Device API key for demo: DEV-$code"
+    return @($Cabinets + $newCabinet)
+}
+
+function Add-InteractiveTool {
+    param(
+        [object[]]$Cabinets,
+        [hashtable]$AdminHeaders
+    )
+
+    $selectedCabinet = Select-FromList `
+        -Title "Choose cabinet for new tool" `
+        -Items $Cabinets `
+        -FormatItem { param($cabinet) "$($cabinet.Name) ($($cabinet.Code))" }
+
+    if ($selectedCabinet.Count -eq 0) {
+        return
+    }
+
+    $cabinet = $selectedCabinet[0]
+    $tagCode = Read-Host "Tool RFID/tag code"
+    if ([string]::IsNullOrWhiteSpace($tagCode)) {
+        Write-Host "Cancelled."
+        return
+    }
+
+    $displayName = Read-Host "Tool display name"
+    if ([string]::IsNullOrWhiteSpace($displayName)) {
+        Write-Host "Cancelled."
+        return
+    }
+
+    $tagCode = $tagCode.Trim().ToUpperInvariant()
+    $displayName = $displayName.Trim()
+
+    Invoke-JsonApi -Method "POST" -Path "/api/admin/tools" -Headers $AdminHeaders -Body @{
+        cabinetId = $cabinet.Id
+        tagCode = $tagCode
+        displayName = $displayName
+    } | Out-Null
+
+    $cabinet.Tools = @($cabinet.Tools + [pscustomobject]@{ Tag = $tagCode; Name = $displayName })
+    $cabinet.PresentTags = @($cabinet.PresentTags + $tagCode | Select-Object -Unique)
+
+    Write-Host "Created tool $displayName [$tagCode] in $($cabinet.Name)."
+}
+
+function Show-AdminFunctions {
+    param([object[]]$Cabinets)
+
+    $adminHeaders = @{ Authorization = "Bearer ADMIN-TOKEN-DEMO" }
+
+    while ($true) {
+        Write-Host ""
+        Write-Host "Admin functions"
+        Write-Host "1. Add cabinet"
+        Write-Host "2. Add tool"
+        Write-Host "3. List cabinets and tools"
+        Write-Host "0. Back"
+
+        $choice = Read-Host "Choose option"
+        try {
+            switch ($choice) {
+                "1" { $Cabinets = @(Add-InteractiveCabinet -Cabinets $Cabinets -AdminHeaders $adminHeaders) }
+                "2" { Add-InteractiveTool -Cabinets $Cabinets -AdminHeaders $adminHeaders }
+                "3" { Show-AdminState -Cabinets $Cabinets }
+                "0" { return @($Cabinets) }
+                default { Write-Host "Invalid option." }
+            }
+        } catch {
+            Write-Host "Error: $($_.Exception.Message)"
+        }
+    }
 }
 
 function Show-DayState {
@@ -526,7 +646,7 @@ function Invoke-WorkPeriod {
 
     Write-Host ""
     Write-Host "$Label..."
-    Start-Sleep -Seconds 2
+    Start-Sleep -Seconds 1
 }
 
 function Invoke-SupervisorReview {
@@ -569,7 +689,6 @@ function Invoke-SupervisorReview {
 function Invoke-LunchPrompt {
     param([object]$Context)
 
-    Invoke-WorkPeriod -Label "Working until lunch"
     $answer = Read-Host "It is lunch time. Drop off some tools? [y/N]"
     if ($answer -match "^[Yy]") {
         Invoke-ReturnTools -Context $Context
@@ -581,7 +700,6 @@ function Invoke-LunchPrompt {
 function Invoke-EndOfDay {
     param([object]$Context)
 
-    Invoke-WorkPeriod -Label "Working until end of day"
     $answer = Read-Host "End of day. Return all active tools? [Y/n]"
     if ($answer -notmatch "^[Nn]") {
         Invoke-ReturnTools -Context $Context -All
@@ -597,6 +715,54 @@ function Invoke-EndOfDay {
             Invoke-SupervisorReview -Context $Context
         }
     }
+}
+
+function Invoke-PickupPhase {
+    param([object]$Context)
+
+    while ($true) {
+        Write-Host ""
+        Write-Host "1. Pick up tools"
+
+        $choice = Read-Host "Choose option"
+        if ($choice -ne "1") {
+            Write-Host "You need to pick up tools before starting work."
+            continue
+        }
+
+        try {
+            Invoke-PickTools -Context $Context
+        } catch {
+            Write-Host "Error while picking tools: $($_.Exception.Message)"
+            Write-Host "Tip: run scripts\dev\reset-db.cmd before a clean demo."
+            continue
+        }
+
+        $answer = Read-Host "Do you need to pick up more tools? [y/N]"
+        if ($answer -notmatch "^[Yy]") {
+            break
+        }
+    }
+
+    Write-Host ""
+    Write-Host "1. Start working"
+    while ((Read-Host "Choose option") -ne "1") {
+        Write-Host "Invalid option."
+    }
+}
+
+function Invoke-WorkdayAfterPickup {
+    param([object]$Context)
+
+    Invoke-WorkPeriod -Label "Working until lunch"
+    Invoke-LunchPrompt -Context $Context
+
+    Invoke-WorkPeriod -Label "Working until end of day"
+    Invoke-EndOfDay -Context $Context
+
+    Write-Host ""
+    Write-Host "Final state:"
+    Show-DayState -Context $Context
 }
 
 function Invoke-InteractiveScenario {
@@ -620,7 +786,7 @@ function Invoke-InteractiveScenario {
                     Write-Host "Day started for operator $($context.OperatorId)"
                 }
                 "2" {
-                    Show-AdminFunctions -Cabinets $cabinets
+                    $cabinets = @(Show-AdminFunctions -Cabinets $cabinets)
                 }
                 "0" {
                     return
@@ -634,31 +800,12 @@ function Invoke-InteractiveScenario {
         }
     }
 
-    while ($true) {
-        Write-Host ""
-        Write-Host "1. Go pick up tools"
-        Write-Host "2. Go back to work"
-        Write-Host "3. Lunch time"
-        Write-Host "4. End of day return"
-        Write-Host "5. Tool broken/missing review"
-        Write-Host "6. Show current state"
-        Write-Host "0. Exit"
+    Invoke-PickupPhase -Context $context
+    Invoke-WorkdayAfterPickup -Context $context
 
-        $choice = Read-Host "Choose option"
-        try {
-            switch ($choice) {
-                "1" { Invoke-PickTools -Context $context }
-                "2" { Invoke-WorkPeriod -Label "Working" }
-                "3" { Invoke-LunchPrompt -Context $context }
-                "4" { Invoke-EndOfDay -Context $context }
-                "5" { Invoke-SupervisorReview -Context $context }
-                "6" { Show-DayState -Context $context }
-                "0" { return }
-                default { Write-Host "Invalid option." }
-            }
-        } catch {
-            Write-Host "Error: $($_.Exception.Message)"
-        }
+    $answer = Read-Host "Open supervisor review for a broken/missing tool? [y/N]"
+    if ($answer -match "^[Yy]") {
+        Invoke-SupervisorReview -Context $context
     }
 }
 
