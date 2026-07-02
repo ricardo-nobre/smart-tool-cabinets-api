@@ -46,7 +46,7 @@ public class DeviceOperatorAuthService {
         }
 
         Optional<User> user = switch (request.method()) {
-            case PIN -> userRepository.findByPinHash(credential);
+            case PIN -> userRepository.findByPinHash(User.hashPin(credential));
             case NFC -> userRepository.findByNfcUid(credential.toUpperCase(Locale.ROOT));
         };
 

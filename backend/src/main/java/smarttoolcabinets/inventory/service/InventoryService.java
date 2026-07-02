@@ -70,7 +70,7 @@ public class InventoryService {
             throw new IllegalArgumentException("snapshotType is required");
         }
         if (!SnapshotType.SUPPORTED.contains(normalizedSnapshotType)) {
-            throw new IllegalArgumentException("snapshotType must be BEFORE, AFTER or EXTRA");
+            throw new IllegalArgumentException("snapshotType must be BEFORE or AFTER");
         }
 
         if (SnapshotType.BEFORE.equals(normalizedSnapshotType)
@@ -125,8 +125,8 @@ public class InventoryService {
         InventorySnapshot i = inventorySnapshotRepository.save(is);
 
         List<InventorySnapshotItem> items = recognizedTags.stream()
-                        .map(tag -> InventorySnapshotItem.newItem(i.getId(), tag, toolIdByTag.get(tag)))
-                        .toList();
+                .map(tag -> InventorySnapshotItem.newItem(i.getId(), tag, toolIdByTag.get(tag)))
+                .toList();
 
         inventorySnapshotItemRepository.saveAll(items);
 

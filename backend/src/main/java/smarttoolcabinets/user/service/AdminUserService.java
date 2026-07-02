@@ -19,17 +19,17 @@ public class AdminUserService {
     @Transactional
     public String createUser(AdminUserCreateRequest request) {
         String username = request.username().trim();
-        if(userRepository.findByUsername(username).isPresent()){
+        if (userRepository.findByUsername(username).isPresent()) {
             throw new IllegalArgumentException("Username already exists: " + username);
         }
         String role = request.role().trim().toUpperCase();
-        if(!UserRole.SUPPORTED.contains(role)){
+        if (!UserRole.SUPPORTED.contains(role)) {
             throw new IllegalArgumentException("Invalid role: " + role);
         }
 
         String pinHash = null;
         if (request.pin() != null && !request.pin().isBlank()) {
-            pinHash = request.pin().trim();
+            pinHash = User.hashPin(request.pin().trim());
         }
 
         String nfcUid = null;

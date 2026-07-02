@@ -9,7 +9,6 @@ tags:
   - name: Device Auth
   - name: Device Access
   - name: Device Snapshot
-  - name: Device Event
   - name: Operator
   - name: Supervisor
   - name: Admin
@@ -331,23 +330,19 @@ components:
     bearerDeviceAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWT
-      description: Token Bearer de dispositivo (ambiente académico pode usar token estático)
+      description: Token Bearer simplificado de dispositivo para o MVP académico
     bearerOperatorAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWT
-      description: Token Bearer de operador
+      description: Token Bearer simplificado de operador para o MVP académico
     bearerSupervisorAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWT
-      description: Token Bearer de supervisor
+      description: Token Bearer simplificado de supervisor para o MVP académico
     bearerAdminAuth:
       type: http
       scheme: bearer
-      bearerFormat: JWT
-      description: Token Bearer de administrador
+      description: Token Bearer simplificado de administrador para o MVP académico
 
   responses:
     BadRequest:
@@ -446,7 +441,7 @@ components:
       type: object
       required: [snapshotType, capturedAt, source, observedTags]
       properties:
-        snapshotType: { type: string, enum: [BEFORE, AFTER, EXTRA] }
+        snapshotType: { type: string, enum: [BEFORE, AFTER] }
         capturedAt: { type: string, format: date-time }
         source: { type: string }
         observedTags:

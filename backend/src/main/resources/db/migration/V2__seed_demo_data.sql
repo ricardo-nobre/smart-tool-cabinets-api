@@ -9,7 +9,7 @@ SET name = EXCLUDED.name,
 INSERT INTO app_user (id, username, full_name, role, active, pin_hash, nfc_uid)
 VALUES
     ('00000000-0000-0000-0000-000000000101', 'admin', 'Admin LEIRT', 'ADMIN', TRUE, NULL, NULL),
-    ('00000000-0000-0000-0000-000000000201', 'operator1', 'Operator Demo', 'OPERATOR', TRUE, '1234', 'NFC-OP-001'),
+    ('00000000-0000-0000-0000-000000000201', 'operator1', 'Operator Demo', 'OPERATOR', TRUE, '03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4', 'NFC-OP-001'),
     ('00000000-0000-0000-0000-000000000301', 'supervisor1', 'Supervisor Demo', 'SUPERVISOR', TRUE, NULL, 'NFC-SUP-001')
 ON CONFLICT (username) DO UPDATE
 SET full_name = EXCLUDED.full_name,

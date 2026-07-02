@@ -52,7 +52,7 @@ Flyway seeds minimal local data for the demonstrator:
 
 - cabinet: `CAB-001`
 - device API key for the demo auth flow: `DEV-CAB-001`
-- operator: `operator1`, PIN `1234`
+- operator: `operator1`, PIN `1234` stored as a SHA-256 hash
 - supervisor: `supervisor1`
 - admin: `admin`
 - demo RFID tags: `TAG-001`, `TAG-002`, `TAG-003`, `TAG-004`
@@ -139,4 +139,4 @@ Known limitations:
 
 - render the EA diagram and include it in the final report;
 - review OpenAPI examples against the final demo flow;
-- improve credential handling if time allows.
+- add more tests for tool return, supervisor resolution and invalid snapshots.
