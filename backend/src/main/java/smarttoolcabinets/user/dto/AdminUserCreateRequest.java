@@ -1,18 +1,14 @@
 package smarttoolcabinets.user.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
-/**
- * Pedido administrativo para criar utilizador.
- *
- * Evolucao futura: regras de role e validacao de username/politica de acessos.
- */
 public record AdminUserCreateRequest(
-        @NotBlank String username,
-        String fullName,
-        @NotBlank String role,
-        String pin,
-        String nfcUid
+        @NotBlank @Size(max = 64) String username,
+        @Size(max = 128) String fullName,
+        @NotBlank @Size(max = 32) String role,
+        @Size(max = 255) String pin,
+        @Size(max = 128) String nfcUid
 ) {
 }
 

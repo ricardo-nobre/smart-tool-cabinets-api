@@ -6,6 +6,7 @@ import smarttoolcabinets.cabinet.repository.CabinetRepository;
 import smarttoolcabinets.cabinetaccess.dto.OperatorAuthRequest;
 import smarttoolcabinets.cabinetaccess.dto.OperatorAuthResponse;
 import smarttoolcabinets.user.domain.User;
+import smarttoolcabinets.user.domain.UserRole;
 import smarttoolcabinets.user.repository.UserRepository;
 
 import java.util.Locale;
@@ -30,10 +31,7 @@ public class DeviceOperatorAuthService {
             throw new IllegalArgumentException("request is required");
         }
 
-        String cabinetCode = request.cabinetCode() == null ? "" : request.cabinetCode().trim();
-        if (cabinetCode.isBlank()) {
-            throw new IllegalArgumentException("cabinetCode is required");
-        }
+        String cabinetCode = requiredText(request.cabinetCode(), "cabinetCode is required");
 
         var cabinet = cabinetRepository.findByCode(cabinetCode)
                 .orElseThrow(() -> new IllegalArgumentException("cabinet not found for code: " + cabinetCode));
@@ -42,9 +40,9 @@ public class DeviceOperatorAuthService {
             throw new IllegalStateException("cabinet is not active: " + cabinetCode);
         }
 
-        String credential = request.credential() == null ? "" : request.credential().trim();
-        if (credential.isBlank()) {
-            throw new IllegalArgumentException("credential is required");
+        String credential = requiredText(request.credential(), "credential is required");
+        if (request.method() == null) {
+            throw new IllegalArgumentException("method is required");
         }
 
         Optional<User> user = switch (request.method()) {
@@ -56,11 +54,18 @@ public class DeviceOperatorAuthService {
         if (!operator.isActive()) {
             throw new IllegalStateException("operator is not active: " + operator.getId());
         }
-        if (!"OPERATOR".equalsIgnoreCase(operator.getRole())) {
+        if (!UserRole.OPERATOR.equalsIgnoreCase(operator.getRole())) {
             throw new BadCredentialsException("Invalid operator credential");
         }
 
         return new OperatorAuthResponse(operator.getId(), "AUTHENTICATED");
+    }
+
+    private String requiredText(String value, String message) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(message);
+        }
+        return value.trim();
     }
 }
 

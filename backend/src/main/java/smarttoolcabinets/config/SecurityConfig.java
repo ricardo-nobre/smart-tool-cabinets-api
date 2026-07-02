@@ -12,13 +12,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import smarttoolcabinets.user.domain.UserRole;
 
-/**
- * Configuração de segurança base do backend.
- *
- * Esta versão e intencionalmente minima para desbloquear o arranque tecnico.
- * A autenticacao real de dispositivos por API key fica para implementacao manual.
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -34,16 +29,6 @@ public class SecurityConfig {
         this.tokenAuthenticationFilter = tokenAuthenticationFilter;
     }
 
-    /**
-     * Objetivo: definir regras HTTP de seguranca iniciais.
-     * Inputs esperados: HttpSecurity providenciado pelo Spring.
-     * Output esperado: SecurityFilterChain ativo para toda a aplicacao.
-     * Passos logicos a implementar:
-     * 1) Introduzir filtro custom de API key para /api/device/**.
-     * 2) Definir politicas diferentes para endpoints admin vs device.
-     * 3) Ativar tratamento uniforme de erros de autenticacao/autorizacao.
-     * Notas: manter Swagger acessivel em ambiente de desenvolvimento.
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         boolean isDevProfile = environment.acceptsProfiles(Profiles.of("dev"));
@@ -63,9 +48,9 @@ public class SecurityConfig {
                         .requestMatchers(isDevProfile ? "/swagger-ui/**" : "/__swagger-disabled__").permitAll()
                         .requestMatchers(isDevProfile ? "/swagger-ui.html" : "/__swagger-disabled__").permitAll()
                         .requestMatchers("/api/device/**").hasRole("DEVICE")
-                        .requestMatchers("/api/operators/**").hasAnyRole("OPERATOR", "SUPERVISOR", "ADMIN")
-                        .requestMatchers("/api/supervisor/**").hasAnyRole("SUPERVISOR", "ADMIN")
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/operators/**").hasAnyRole(UserRole.OPERATOR, UserRole.SUPERVISOR, UserRole.ADMIN)
+                        .requestMatchers("/api/supervisor/**").hasAnyRole(UserRole.SUPERVISOR, UserRole.ADMIN)
+                        .requestMatchers("/api/admin/**").hasRole(UserRole.ADMIN)
                         .anyRequest().denyAll()
                 );
         return http.build();

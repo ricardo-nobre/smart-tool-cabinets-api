@@ -5,23 +5,27 @@ import org.springframework.transaction.annotation.Transactional;
 import smarttoolcabinets.audit.domain.AuditEntityType;
 import smarttoolcabinets.audit.service.AuditService;
 import smarttoolcabinets.cabinet.repository.CabinetRepository;
+import smarttoolcabinets.cabinetaccess.domain.CabinetAccessStatus;
 import smarttoolcabinets.inventory.domain.InventorySnapshot;
 import smarttoolcabinets.inventory.domain.InventorySnapshotItem;
+import smarttoolcabinets.inventory.domain.SnapshotType;
 import smarttoolcabinets.inventory.repository.InventorySnapshotItemRepository;
 import smarttoolcabinets.inventory.repository.InventorySnapshotRepository;
 import smarttoolcabinets.inventory.service.InventoryDeltaService;
 import smarttoolcabinets.cabinetaccess.domain.CabinetAccess;
+import smarttoolcabinets.cabinetaccess.domain.OperationalResult;
 import smarttoolcabinets.cabinetaccess.dto.CloseCabinetAccessResponse;
 import smarttoolcabinets.cabinetaccess.dto.OpenCabinetAccessRequest;
 import smarttoolcabinets.cabinetaccess.dto.OpenCabinetAccessResponse;
 import smarttoolcabinets.cabinetaccess.repository.CabinetAccessRepository;
 import smarttoolcabinets.toolassignment.domain.ToolAssignment;
+import smarttoolcabinets.toolassignment.domain.ToolAssignmentStatus;
 import smarttoolcabinets.toolassignment.repository.ToolAssignmentRepository;
+import smarttoolcabinets.user.domain.UserRole;
 import smarttoolcabinets.user.repository.UserRepository;
 
 import java.time.OffsetDateTime;
 import java.util.LinkedHashSet;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -91,11 +95,11 @@ public class DeviceCabinetAccessService {
           if (!operator.isActive()) {
               throw new IllegalStateException("operator is not active: " + operatorId);
           }
-          if (!"OPERATOR".equalsIgnoreCase(operator.getRole())) {
+          if (!UserRole.OPERATOR.equalsIgnoreCase(operator.getRole())) {
               throw new IllegalArgumentException("operator must have role OPERATOR");
           }
 
-          if (cabinetAccessRepository.findFirstByCabinetIdAndStatus(cabinet.getId(), "OPEN").isPresent()) {
+          if (cabinetAccessRepository.findFirstByCabinetIdAndStatus(cabinet.getId(), CabinetAccessStatus.OPEN).isPresent()) {
               throw new IllegalStateException("an OPEN cabinetAccess already exists for cabinet: " + cabinet.getId());
           }
 
@@ -134,7 +138,7 @@ public class DeviceCabinetAccessService {
             throw new IllegalArgumentException("cabinetAccess not found");
         }
         CabinetAccess s = cabinetAccess.get();
-        if(!s.getStatus().equals("OPEN")) {
+        if(!CabinetAccessStatus.OPEN.equals(s.getStatus())) {
             throw new IllegalStateException("CabinetAccess is not open: " + parsedCabinetAccessId);
         }
 
@@ -143,26 +147,14 @@ public class DeviceCabinetAccessService {
         boolean discrepancyFlag = false;
 
         Optional<InventorySnapshot> beforeSnapshot = inventorySnapshotRepository
-                .findByCabinetAccessIdAndSnapshotType(parsedCabinetAccessId, "BEFORE")
+                .findByCabinetAccessIdAndSnapshotType(parsedCabinetAccessId, SnapshotType.BEFORE)
                 .stream()
                 .findFirst();
 
         Optional<InventorySnapshot> afterSnapshot = inventorySnapshotRepository
-                .findByCabinetAccessIdAndSnapshotType(parsedCabinetAccessId, "AFTER")
+                .findByCabinetAccessIdAndSnapshotType(parsedCabinetAccessId, SnapshotType.AFTER)
                 .stream()
                 .findFirst();
-
-        int unknownTagsCount = afterSnapshot
-                .or(() -> inventorySnapshotRepository.findTopByCabinetAccessIdOrderByCapturedAtDesc(parsedCabinetAccessId))
-                .map(snapshot -> inventorySnapshotItemRepository.findBySnapshotId(snapshot.getId()).stream()
-                        .filter(item -> !item.isRecognized())
-                        .map(InventorySnapshotItem::getTagCode)
-                        .filter(tag -> tag != null && !tag.isBlank())
-                        .map(tag -> tag.trim().toUpperCase(Locale.ROOT))
-                        .distinct()
-                        .toList()
-                        .size())
-                .orElse(0);
 
         if (beforeSnapshot.isPresent() && afterSnapshot.isPresent()) {
             Set<UUID> beforeTools = extractRecognizedToolIds(beforeSnapshot.get().getId());
@@ -170,7 +162,7 @@ public class DeviceCabinetAccessService {
             var delta = inventoryDeltaService.calculate(beforeTools, afterTools);
 
             for (UUID toolId : delta.removed()) {
-                if (toolAssignmentRepository.findByToolIdAndStatus(toolId, "ACTIVE").isPresent()) {
+                if (toolAssignmentRepository.findByToolIdAndStatus(toolId, ToolAssignmentStatus.ACTIVE).isPresent()) {
                     discrepancyFlag = true;
                     continue;
                 }
@@ -186,7 +178,7 @@ public class DeviceCabinetAccessService {
             }
 
             for (UUID toolId : delta.returned()) {
-                Optional<ToolAssignment> activeAssignmentOpt = toolAssignmentRepository.findByToolIdAndStatus(toolId, "ACTIVE");
+                Optional<ToolAssignment> activeAssignmentOpt = toolAssignmentRepository.findByToolIdAndStatus(toolId, ToolAssignmentStatus.ACTIVE);
                 if (activeAssignmentOpt.isEmpty()) {
                     discrepancyFlag = true;
                     continue;
@@ -221,13 +213,11 @@ public class DeviceCabinetAccessService {
 
         String operationalResult;
         if (discrepancyFlag) {
-            operationalResult = "CLOSED_WITH_DISCREPANCY";
-        } else if (unknownTagsCount > 0) {
-            operationalResult = "CLOSED_WITH_UNKNOWN_TAGS";
+            operationalResult = OperationalResult.CLOSED_WITH_DISCREPANCY;
         } else if (assignmentsCreatedCount > 0 || assignmentsReturnedCount > 0) {
-            operationalResult = "CLOSED_WITH_ASSIGNMENTS";
+            operationalResult = OperationalResult.CLOSED_WITH_ASSIGNMENTS;
         } else {
-            operationalResult = "CLOSED_OK";
+            operationalResult = OperationalResult.CLOSED_OK;
         }
 
         return new CloseCabinetAccessResponse(
@@ -237,14 +227,12 @@ public class DeviceCabinetAccessService {
                 operationalResult,
                 assignmentsCreatedCount,
                 assignmentsReturnedCount,
-                unknownTagsCount,
                 discrepancyFlag
         );
      }
 
     private Set<UUID> extractRecognizedToolIds(UUID snapshotId) {
         return inventorySnapshotItemRepository.findBySnapshotId(snapshotId).stream()
-                .filter(InventorySnapshotItem::isRecognized)
                 .map(InventorySnapshotItem::getToolId)
                 .filter(toolId -> toolId != null)
                 .collect(Collectors.toCollection(LinkedHashSet::new));

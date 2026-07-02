@@ -5,7 +5,6 @@ import java.util.UUID;
 
 public record CreateSnapshotResponse (
         UUID snapshotId,
-        List<String> recognizedTags,
-        List<String> unknownTags
+        List<String> recognizedTags
 ) {
 }

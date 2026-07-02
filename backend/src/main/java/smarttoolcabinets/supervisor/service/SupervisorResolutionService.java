@@ -14,6 +14,7 @@ import smarttoolcabinets.supervisor.repository.SupervisorResolutionAssignmentRep
 import smarttoolcabinets.supervisor.repository.SupervisorResolutionRepository;
 import smarttoolcabinets.toolassignment.domain.ToolAssignment;
 import smarttoolcabinets.toolassignment.repository.ToolAssignmentRepository;
+import smarttoolcabinets.user.domain.UserRole;
 import smarttoolcabinets.user.repository.UserRepository;
 
 import java.util.ArrayList;
@@ -47,13 +48,13 @@ public class SupervisorResolutionService {
     public CreateSupervisorResolutionResponse create(CreateSupervisorResolutionRequest request) {
         var operator = userRepository.findById(request.operatorId())
                 .orElseThrow(() -> new IllegalArgumentException("operator not found: " + request.operatorId()));
-        if (!"OPERATOR".equalsIgnoreCase(operator.getRole())) {
+        if (!UserRole.OPERATOR.equalsIgnoreCase(operator.getRole())) {
             throw new IllegalArgumentException("operatorId must reference role OPERATOR");
         }
 
         var supervisor = userRepository.findById(request.supervisorId())
                 .orElseThrow(() -> new IllegalArgumentException("supervisor not found: " + request.supervisorId()));
-        if (!"SUPERVISOR".equalsIgnoreCase(supervisor.getRole())) {
+        if (!UserRole.SUPERVISOR.equalsIgnoreCase(supervisor.getRole())) {
             throw new IllegalArgumentException("supervisorId must reference role SUPERVISOR");
         }
 
@@ -88,7 +89,7 @@ public class SupervisorResolutionService {
         supervisorResolutionAssignmentRepository.saveAll(links);
 
         auditService.logAction(
-                "SUPERVISOR",
+                UserRole.SUPERVISOR,
                 request.supervisorId().toString(),
                 "CREATE_SUPERVISOR_RESOLUTION",
                 AuditEntityType.SUPERVISOR_RESOLUTION,

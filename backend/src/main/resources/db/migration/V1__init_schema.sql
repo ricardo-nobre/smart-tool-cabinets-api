@@ -41,16 +41,6 @@ CREATE TABLE cabinet_access (
     CONSTRAINT fk_cabinet_access_operator FOREIGN KEY (operator_id) REFERENCES app_user(id)
 );
 
-CREATE TABLE cabinet_event (
-    id UUID PRIMARY KEY,
-    cabinet_access_id UUID NOT NULL,
-    event_type VARCHAR(64) NOT NULL,
-    payload_json TEXT,
-    occurred_at TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    CONSTRAINT fk_cabinet_event_cabinet_access FOREIGN KEY (cabinet_access_id) REFERENCES cabinet_access(id)
-);
-
 CREATE TABLE inventory_snapshot (
     id UUID PRIMARY KEY,
     cabinet_access_id UUID NOT NULL,
@@ -65,8 +55,7 @@ CREATE TABLE inventory_snapshot_item (
     id UUID PRIMARY KEY,
     snapshot_id UUID NOT NULL,
     tag_code VARCHAR(128) NOT NULL,
-    tool_id UUID,
-    recognized BOOLEAN NOT NULL,
+    tool_id UUID NOT NULL,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     CONSTRAINT fk_inventory_snapshot_item_snapshot FOREIGN KEY (snapshot_id) REFERENCES inventory_snapshot(id),
     CONSTRAINT fk_inventory_snapshot_item_tool FOREIGN KEY (tool_id) REFERENCES tool(id)
@@ -147,9 +136,6 @@ CREATE INDEX idx_cabinet_access_cabinet_status
 
 CREATE INDEX idx_cabinet_access_operator_opened_at
     ON cabinet_access (operator_id, opened_at);
-
-CREATE INDEX idx_cabinet_event_cabinet_access_id
-    ON cabinet_event (cabinet_access_id);
 
 CREATE INDEX idx_inventory_snapshot_cabinet_access_id
     ON inventory_snapshot (cabinet_access_id);

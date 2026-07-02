@@ -13,7 +13,6 @@ public record CloseCabinetAccessResponse (
         String operationalResult,
         int assignmentsCreatedCount,
         int assignmentsReturnedCount,
-        int unknownTagsCount,
         boolean discrepancyFlag
 ){
 }

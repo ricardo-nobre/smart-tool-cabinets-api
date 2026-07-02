@@ -4,31 +4,32 @@ import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class InventoryDeltaService {
 
-    public <T> InventoryDelta<T> calculate(Set<T> before, Set<T> after) {
-        Set<T> normalizedBefore = copyOf(before);
-        Set<T> normalizedAfter = copyOf(after);
+    public InventoryDelta calculate(Set<UUID> beforeToolIds, Set<UUID> afterToolIds) {
+        Set<UUID> normalizedBefore = copyOf(beforeToolIds);
+        Set<UUID> normalizedAfter = copyOf(afterToolIds);
 
-        Set<T> removed = new LinkedHashSet<>(normalizedBefore);
+        Set<UUID> removed = new LinkedHashSet<>(normalizedBefore);
         removed.removeAll(normalizedAfter);
 
-        Set<T> returned = new LinkedHashSet<>(normalizedAfter);
+        Set<UUID> returned = new LinkedHashSet<>(normalizedAfter);
         returned.removeAll(normalizedBefore);
 
-        Set<T> unchanged = new LinkedHashSet<>(normalizedBefore);
+        Set<UUID> unchanged = new LinkedHashSet<>(normalizedBefore);
         unchanged.retainAll(normalizedAfter);
 
-        return new InventoryDelta<>(
+        return new InventoryDelta(
                 Set.copyOf(removed),
                 Set.copyOf(returned),
                 Set.copyOf(unchanged)
         );
     }
 
-    private <T> Set<T> copyOf(Set<T> values) {
+    private Set<UUID> copyOf(Set<UUID> values) {
         return values == null ? Set.of() : new LinkedHashSet<>(values);
     }
 }

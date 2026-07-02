@@ -8,13 +8,6 @@ import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/**
- * Entidade base de utilizador de administracao/operacao.
- *
- * Serve para associar atores a sessoes e a eventos de auditoria.
- * Relaciona-se com CabinetAccess (operatorId) e audit log.
- * Evolucao futura: modelo de autenticacao/autorizacao e politicas de roles.
- */
 @Entity
 @Table(name = "app_user")
 public class User {

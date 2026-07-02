@@ -27,9 +27,6 @@ public class InventorySnapshotItem {
     @Column(name = "tool_id")
     private UUID toolId;
 
-    @Column(nullable = false)
-    private boolean recognized;
-
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -37,23 +34,18 @@ public class InventorySnapshotItem {
         // JPA
     }
 
-    public static InventorySnapshotItem newItem(UUID snapshotId, String tagCode, UUID toolId, boolean recognized) {
+    public static InventorySnapshotItem newItem(UUID snapshotId, String tagCode, UUID toolId) {
         InventorySnapshotItem item = new InventorySnapshotItem();
         item.id = UUID.randomUUID();
         item.snapshotId = snapshotId;
         item.tagCode = tagCode;
         item.toolId = toolId;
-        item.recognized = recognized;
         item.createdAt = OffsetDateTime.now();
         return item;
     }
 
     public String getTagCode() {
         return tagCode;
-    }
-
-    public boolean isRecognized() {
-        return recognized;
     }
 
     public UUID getToolId() {

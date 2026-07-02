@@ -2,18 +2,14 @@ package smarttoolcabinets.tool.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.util.UUID;
 
-/**
- * Pedido administrativo para criar ferramenta.
- *
- * Evolucao futura: regras de unicidade por armario e validacao de formato de tag.
- */
 public record AdminToolCreateRequest(
         @NotNull UUID cabinetId,
-        @NotBlank String tagCode,
-        @NotBlank String displayName
+        @NotBlank @Size(max = 128) String tagCode,
+        @NotBlank @Size(max = 128) String displayName
 ) {
 }
 

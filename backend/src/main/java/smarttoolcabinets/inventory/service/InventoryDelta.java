@@ -1,10 +1,11 @@
 package smarttoolcabinets.inventory.service;
 
 import java.util.Set;
+import java.util.UUID;
 
-public record InventoryDelta<T>(
-        Set<T> removed,
-        Set<T> returned,
-        Set<T> unchanged
+public record InventoryDelta(
+        Set<UUID> removed,
+        Set<UUID> returned,
+        Set<UUID> unchanged
 ) {
 }

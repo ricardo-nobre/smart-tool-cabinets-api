@@ -10,11 +10,6 @@ import smarttoolcabinets.cabinet.repository.CabinetRepository;
 import java.time.OffsetDateTime;
 import java.util.Optional;
 
-/**
- * Service de autenticacao de dispositivos de armario.
- *
- * Centraliza regras de autenticacao de dispositivo por credencial tecnica.
- */
 @Service
 public class DeviceAuthService {
 
@@ -24,23 +19,15 @@ public class DeviceAuthService {
         this.cabinetRepository = cabinetRepository;
     }
 
-    /**
-     * Objetivo: autenticar um armario via cabinetCode + apiKey.
-     */
     public DeviceAuthResponse authenticate(DeviceAuthRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("request is required");
         }
-        if(request.apiKey() == null || request.cabinetCode() == null) {
-            throw new IllegalArgumentException("Credenciais incompletas");
-        }
-        if(request.apiKey().isBlank() || request.cabinetCode().isBlank()) {
-            throw new IllegalArgumentException("Credenciais incompletas");
-        }
-        if (request.apiKey().length() > 255 || request.cabinetCode().length() > 64) {
+        String cabinetCode = requiredText(request.cabinetCode(), "Credenciais incompletas");
+        String apiKey = requiredText(request.apiKey(), "Credenciais incompletas");
+        if (apiKey.length() > 255 || cabinetCode.length() > 64) {
             throw new IllegalArgumentException("Credenciais invalidas");
         }
-        String cabinetCode = request.cabinetCode().trim();
         Optional<Cabinet> cabinetOpt = cabinetRepository.findByCode(cabinetCode);
         if (cabinetOpt.isEmpty()) {
             throw new BadCredentialsException("Credenciais invalidas");
@@ -49,12 +36,19 @@ public class DeviceAuthService {
         if(!cabinet.isActive()) {
             throw new IllegalStateException("Cabinet inativo");
         }
-        String requestApiKeyHash = Cabinet.hashApiKey(request.apiKey().trim());
+        String requestApiKeyHash = Cabinet.hashApiKey(apiKey);
         if (!requestApiKeyHash.equals(cabinet.getApiKeyHash())) {
             throw new BadCredentialsException("Credenciais invalidas");
         }
         String tempToken = "DEV-TOKEN-" + cabinet.getCode();
         return new DeviceAuthResponse(tempToken, OffsetDateTime.now().plusHours(8));
+    }
+
+    private String requiredText(String value, String message) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(message);
+        }
+        return value.trim();
     }
 }
 

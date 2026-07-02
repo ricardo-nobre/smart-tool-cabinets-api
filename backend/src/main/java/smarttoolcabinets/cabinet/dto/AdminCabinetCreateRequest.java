@@ -1,16 +1,12 @@
 package smarttoolcabinets.cabinet.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
-/**
- * Pedido administrativo para criar armario.
- *
- * Evolucao futura: regras de validacao de codigo unico e politica de naming.
- */
 public record AdminCabinetCreateRequest(
-        @NotBlank String code,
-        @NotBlank String name,
-        String location
+        @NotBlank @Size(max = 64) String code,
+        @NotBlank @Size(max = 128) String name,
+        @Size(max = 255) String location
 ) {
 }
 

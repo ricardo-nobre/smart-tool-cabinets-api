@@ -45,7 +45,7 @@ public class CabinetAccess {
         cabinetAccess.id = UUID.randomUUID();
         cabinetAccess.cabinetId = cabinetId;
         cabinetAccess.operatorId = operatorId;
-        cabinetAccess.status = "OPEN";
+        cabinetAccess.status = CabinetAccessStatus.OPEN;
         cabinetAccess.openedAt = OffsetDateTime.now();
         cabinetAccess.closedAt = null;
         cabinetAccess.createdAt = OffsetDateTime.now();
@@ -61,7 +61,7 @@ public class CabinetAccess {
     }
 
     public void close() {
-        this.status = "CLOSED";
+        this.status = CabinetAccessStatus.CLOSED;
         this.closedAt = OffsetDateTime.now();
     }
 

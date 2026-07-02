@@ -7,6 +7,5 @@ public enum AuditEntityType {
     TOOL_ASSIGNMENT,
     USER,
     SUPERVISOR_RESOLUTION,
-    EVENT,
     INVENTORY_SNAPSHOT
 }

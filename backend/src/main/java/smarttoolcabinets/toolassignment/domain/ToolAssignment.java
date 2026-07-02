@@ -66,7 +66,7 @@ public class ToolAssignment {
         assignment.originCabinetId = originCabinetId;
         assignment.originCabinetAccessId = originCabinetAccessId;
         assignment.assignedAt = assignedAt;
-        assignment.status = "ACTIVE";
+        assignment.status = ToolAssignmentStatus.ACTIVE;
         assignment.createdAt = OffsetDateTime.now();
         return assignment;
     }
@@ -103,15 +103,15 @@ public class ToolAssignment {
         this.returnedToCabinetId = returnedToCabinetId;
         this.returnedViaCabinetAccessId = returnedViaCabinetAccessId;
         this.returnedAt = returnedAt;
-        this.status = "RETURNED";
+        this.status = ToolAssignmentStatus.RETURNED;
     }
 
     public void markPendingReview() {
-        this.status = "PENDING_REVIEW";
+        this.status = ToolAssignmentStatus.PENDING_REVIEW;
     }
 
     public void markResolved() {
-        this.status = "RESOLVED";
+        this.status = ToolAssignmentStatus.RESOLVED;
     }
 }
 

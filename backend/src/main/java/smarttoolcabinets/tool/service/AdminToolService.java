@@ -8,14 +8,10 @@ import smarttoolcabinets.cabinet.repository.CabinetRepository;
 import smarttoolcabinets.tool.domain.Tool;
 import smarttoolcabinets.tool.dto.AdminToolCreateRequest;
 import smarttoolcabinets.tool.repository.ToolRepository;
+import smarttoolcabinets.user.domain.UserRole;
 
 import java.util.UUID;
 
-/**
- * Service administrativo para gestao de ferramentas.
- *
- * Evolucao futura: validacoes por armario e regras de ciclo de vida da ferramenta.
- */
 @Service
 public class AdminToolService {
 
@@ -29,17 +25,6 @@ public class AdminToolService {
         this.auditService = auditService;
     }
 
-    /**
-     * Objetivo: criar ferramenta num armario.
-     * Inputs esperados: cabinetId, tag e nome da ferramenta.
-     * Output esperado: id da ferramenta criada.
-     * Passos logicos a implementar:
-     * 1) Validar existencia do armario.
-     * 2) Validar tag unica globalmente no sistema.
-     * 3) Persistir entidade Tool.
-     * 4) Registar auditoria.
-     * Notas: garantir consistencia com snapshots futuros.
-     */
     @Transactional
     public String createTool(AdminToolCreateRequest request) {
         UUID uuid = request.cabinetId();
@@ -53,7 +38,7 @@ public class AdminToolService {
         Tool tool = Tool.newTool(uuid, code, request.displayName().trim());
         Tool t = toolRepository.save(tool);
         auditService.logAction(
-                "ADMIN",
+                UserRole.ADMIN,
                 "admin",
                 "CREATE_TOOL",
                 AuditEntityType.TOOL,

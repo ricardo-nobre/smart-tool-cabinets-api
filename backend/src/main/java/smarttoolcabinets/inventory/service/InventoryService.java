@@ -6,11 +6,13 @@ import smarttoolcabinets.audit.domain.AuditEntityType;
 import smarttoolcabinets.audit.service.AuditService;
 import smarttoolcabinets.inventory.domain.InventorySnapshot;
 import smarttoolcabinets.inventory.domain.InventorySnapshotItem;
+import smarttoolcabinets.inventory.domain.SnapshotType;
 import smarttoolcabinets.inventory.dto.CreateSnapshotRequest;
 import smarttoolcabinets.inventory.dto.CreateSnapshotResponse;
 import smarttoolcabinets.inventory.repository.InventorySnapshotItemRepository;
 import smarttoolcabinets.inventory.repository.InventorySnapshotRepository;
 import smarttoolcabinets.cabinetaccess.domain.CabinetAccess;
+import smarttoolcabinets.cabinetaccess.domain.CabinetAccessStatus;
 import smarttoolcabinets.cabinetaccess.repository.CabinetAccessRepository;
 import smarttoolcabinets.tool.domain.Tool;
 import smarttoolcabinets.tool.repository.ToolRepository;
@@ -39,19 +41,6 @@ public class InventoryService {
         this.inventorySnapshotItemRepository = inventorySnapshotItemRepository;
     }
 
-    /**
-     * Objetivo: guardar snapshot de inventario associado a CabinetAccess.
-     * Inputs esperados: cabinetAccessId, origem do snapshot e lista de tags observadas.
-     * Output esperado: id do snapshot criado.
-     * Passos logicos a implementar:
-     * 1) Validar CabinetAccess e estrutura do payload.
-     * 2) Persistir snapshot cabecalho.
-     * 3) Persistir itens reconhecidos/desconhecidos por tag.
-     * 4) Produzir informacao para analise de delta no close.
-     * Notas: assegurar consistencia transacional snapshot + itens.
-     */
-
-
     @Transactional
     public CreateSnapshotResponse createSnapshot(String cabinetAccessId, CreateSnapshotRequest request) {
         if (cabinetAccessId == null || cabinetAccessId.isBlank()) {
@@ -72,7 +61,7 @@ public class InventoryService {
         CabinetAccess cabinetAccess = cabinetAccessRepository.findById(parsedCabinetAccessId)
                 .orElseThrow(() -> new IllegalArgumentException("CabinetAccess not found: " + parsedCabinetAccessId));
 
-        if (!"OPEN".equals(cabinetAccess.getStatus())) {
+        if (!CabinetAccessStatus.OPEN.equals(cabinetAccess.getStatus())) {
             throw new IllegalStateException("Cannot create snapshot for closed cabinetAccess: " + parsedCabinetAccessId);
         }
 
@@ -80,20 +69,20 @@ public class InventoryService {
         if (normalizedSnapshotType.isBlank()) {
             throw new IllegalArgumentException("snapshotType is required");
         }
-        if (!Set.of("BEFORE", "AFTER", "EXTRA").contains(normalizedSnapshotType)) {
+        if (!SnapshotType.SUPPORTED.contains(normalizedSnapshotType)) {
             throw new IllegalArgumentException("snapshotType must be BEFORE, AFTER or EXTRA");
         }
 
-        if ("BEFORE".equals(normalizedSnapshotType)
-                && inventorySnapshotRepository.existsByCabinetAccessIdAndSnapshotType(parsedCabinetAccessId, "BEFORE")) {
+        if (SnapshotType.BEFORE.equals(normalizedSnapshotType)
+                && inventorySnapshotRepository.existsByCabinetAccessIdAndSnapshotType(parsedCabinetAccessId, SnapshotType.BEFORE)) {
             throw new IllegalStateException("BEFORE snapshot already exists for cabinetAccess: " + parsedCabinetAccessId);
         }
 
-        if ("AFTER".equals(normalizedSnapshotType)) {
-            if (!inventorySnapshotRepository.existsByCabinetAccessIdAndSnapshotType(parsedCabinetAccessId, "BEFORE")) {
+        if (SnapshotType.AFTER.equals(normalizedSnapshotType)) {
+            if (!inventorySnapshotRepository.existsByCabinetAccessIdAndSnapshotType(parsedCabinetAccessId, SnapshotType.BEFORE)) {
                 throw new IllegalStateException("AFTER snapshot requires a previous BEFORE snapshot");
             }
-            if (inventorySnapshotRepository.existsByCabinetAccessIdAndSnapshotType(parsedCabinetAccessId, "AFTER")) {
+            if (inventorySnapshotRepository.existsByCabinetAccessIdAndSnapshotType(parsedCabinetAccessId, SnapshotType.AFTER)) {
                 throw new IllegalStateException("AFTER snapshot already exists for cabinetAccess: " + parsedCabinetAccessId);
             }
         }
@@ -132,20 +121,11 @@ public class InventoryService {
                 .filter(toolIdByTag::containsKey)
                 .toList();
 
-
-        List<String> unknownTags = normalizedTags.stream()
-                .filter(tag -> !toolIdByTag.containsKey(tag))
-                .toList();
-
         InventorySnapshot is = InventorySnapshot.newSnapshot(parsedCabinetAccessId, normalizedSnapshotType, request.capturedAt(), normalizedSource);
         InventorySnapshot i = inventorySnapshotRepository.save(is);
 
-        List<InventorySnapshotItem> items = normalizedTags.stream()
-                        .map(tag -> {
-                            UUID toolId = toolIdByTag.get(tag);
-                            boolean recognized = toolId != null;
-                            return InventorySnapshotItem.newItem(i.getId(), tag, toolId, recognized);
-                        })
+        List<InventorySnapshotItem> items = recognizedTags.stream()
+                        .map(tag -> InventorySnapshotItem.newItem(i.getId(), tag, toolIdByTag.get(tag)))
                         .toList();
 
         inventorySnapshotItemRepository.saveAll(items);
@@ -159,7 +139,7 @@ public class InventoryService {
         );
 
 
-        return new CreateSnapshotResponse(i.getId(), recognizedTags, unknownTags);
+        return new CreateSnapshotResponse(i.getId(), recognizedTags);
     }
 }
 

@@ -1,16 +1,11 @@
 package smarttoolcabinets.cabinet.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
-/**
- * Pedido de autenticacao de dispositivo.
- *
- * Existe para transportar credenciais minimas do armario no endpoint de auth.
- * Evolucao futura: regras detalhadas de formato e rotacao de chave.
- */
 public record DeviceAuthRequest(
-        @NotBlank String cabinetCode,
-        @NotBlank String apiKey
+        @NotBlank @Size(max = 64) String cabinetCode,
+        @NotBlank @Size(max = 255) String apiKey
 ) {
 }
 

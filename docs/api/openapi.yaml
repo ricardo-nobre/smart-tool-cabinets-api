@@ -120,30 +120,6 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
-  /api/device/cabinet-events:
-    post:
-      tags: [Device Event]
-      summary: Registar evento do armário
-      security:
-        - bearerDeviceAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/RegisterCabinetEventRequest'
-      responses:
-        '201':
-          description: Evento registado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RegisterCabinetEventResponse'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '401':
-          $ref: '#/components/responses/Unauthorized'
-
   /api/device/cabinet-accesses/{cabinetAccessId}/close:
     post:
       tags: [Device Access]
@@ -489,29 +465,11 @@ components:
         recognizedTags:
           type: array
           items: { type: string }
-        unknownTags:
-          type: array
-          items: { type: string }
-
-    RegisterCabinetEventRequest:
-      type: object
-      required: [cabinetAccessId, eventType, occurredAt]
-      properties:
-        cabinetAccessId: { type: string, format: uuid }
-        eventType: { type: string }
-        payload: { type: object, additionalProperties: true }
-        occurredAt: { type: string, format: date-time }
-
-    RegisterCabinetEventResponse:
-      type: object
-      properties:
-        eventId: { type: string, format: uuid }
-        status: { type: string, example: REGISTERED }
 
     CloseCabinetAccessResponse:
       type: object
       required:
-        [cabinetAccessId, status, closedAt, operationalResult, assignmentsCreatedCount, assignmentsReturnedCount, unknownTagsCount, discrepancyFlag]
+        [cabinetAccessId, status, closedAt, operationalResult, assignmentsCreatedCount, assignmentsReturnedCount, discrepancyFlag]
       properties:
         cabinetAccessId: { type: string, format: uuid }
         status: { type: string, enum: [CLOSED] }
@@ -521,11 +479,9 @@ components:
           enum:
             - CLOSED_OK
             - CLOSED_WITH_ASSIGNMENTS
-            - CLOSED_WITH_UNKNOWN_TAGS
             - CLOSED_WITH_DISCREPANCY
         assignmentsCreatedCount: { type: integer, format: int32 }
         assignmentsReturnedCount: { type: integer, format: int32 }
-        unknownTagsCount: { type: integer, format: int32 }
         discrepancyFlag: { type: boolean }
       example:
         cabinetAccessId: 00000000-0000-0000-0000-000000000901
@@ -534,7 +490,6 @@ components:
         operationalResult: CLOSED_WITH_ASSIGNMENTS
         assignmentsCreatedCount: 1
         assignmentsReturnedCount: 0
-        unknownTagsCount: 0
         discrepancyFlag: false
 
     ToolAssignmentItem:

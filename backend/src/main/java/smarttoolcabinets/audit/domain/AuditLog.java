@@ -11,13 +11,6 @@ import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-/**
- * Entidade de auditoria transversal do sistema.
- *
- * Regista quem fez o que e quando, para rastreabilidade.
- * Relaciona-se com fluxo de CabinetAccess/eventos e operacoes administrativas.
- * Evolucao futura: estrategia de detalhes e padroes de acao.
- */
 @Entity
 @Table(name = "audit_log")
 public class AuditLog {

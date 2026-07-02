@@ -8,13 +8,6 @@ import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/**
- * Entidade base de ferramenta registada no sistema.
- *
- * Serve para mapear ferramenta esperada em cada armario.
- * Relaciona-se com snapshots de inventario e eventos operacionais.
- * Evolucao futura: politicas de estado funcional e ciclo de vida da ferramenta.
- */
 @Entity
 @Table(name = "tool")
 public class Tool {

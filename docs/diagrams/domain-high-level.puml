@@ -8,6 +8,7 @@ entity cabinet {
   code : varchar
   name : varchar
   location : varchar
+  api_key_hash : varchar
   active : boolean
 }
 
@@ -56,7 +57,6 @@ entity inventory_snapshot_item {
   snapshot_id : uuid
   tag_code : varchar
   tool_id : uuid
-  recognized : boolean
 }
 
 entity tool_assignment {
@@ -89,15 +89,6 @@ entity supervisor_resolution_assignment {
   * tool_assignment_id : uuid
 }
 
-entity cabinet_event {
-  * id : uuid
-  --
-  cabinet_access_id : uuid
-  event_type : varchar
-  payload_json : text
-  occurred_at : timestamptz
-}
-
 entity audit_log {
   * id : uuid
   --
@@ -121,8 +112,6 @@ cabinet ||--o{ tool_assignment : origin
 cabinet_access ||--o{ tool_assignment : origin_access
 cabinet |o--o{ tool_assignment : return_cabinet
 cabinet_access |o--o{ tool_assignment : return_access
-
-cabinet_access ||--o{ cabinet_event : emits
 
 app_user ||--o{ supervisor_resolution : operator
 app_user ||--o{ supervisor_resolution : supervisor

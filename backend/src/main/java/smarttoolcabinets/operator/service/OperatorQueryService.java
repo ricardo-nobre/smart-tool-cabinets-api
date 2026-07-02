@@ -7,6 +7,7 @@ import smarttoolcabinets.operator.dto.OperatorToolAssignmentsResponse;
 import smarttoolcabinets.operator.dto.ToolAssignmentItem;
 import smarttoolcabinets.tool.repository.ToolRepository;
 import smarttoolcabinets.toolassignment.domain.ToolAssignment;
+import smarttoolcabinets.toolassignment.domain.ToolAssignmentStatus;
 import smarttoolcabinets.toolassignment.repository.ToolAssignmentRepository;
 
 import java.util.List;
@@ -49,8 +50,8 @@ public class OperatorQueryService {
 
     public EndOfDayCheckResponse endOfDayCheck(UUID operatorId) {
         List<ToolAssignment> pendingAssignments = toolAssignmentRepository.findByOperatorId(operatorId).stream()
-                .filter(assignment -> "ACTIVE".equalsIgnoreCase(assignment.getStatus())
-                        || "PENDING_REVIEW".equalsIgnoreCase(assignment.getStatus()))
+                .filter(assignment -> ToolAssignmentStatus.ACTIVE.equalsIgnoreCase(assignment.getStatus())
+                        || ToolAssignmentStatus.PENDING_REVIEW.equalsIgnoreCase(assignment.getStatus()))
                 .toList();
 
         List<ToolAssignmentItem> items = pendingAssignments.stream().map(this::toItem).toList();

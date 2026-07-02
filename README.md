@@ -57,7 +57,7 @@ Flyway seeds minimal local data for the demonstrator:
 - admin: `admin`
 - demo RFID tags: `TAG-001`, `TAG-002`, `TAG-003`, `TAG-004`
 
-The token mechanism is deliberately simple for the MVP. Tokens such as `DEV-TOKEN-CAB-001`, `OPERATOR-TOKEN-DEMO`, `SUPERVISOR-TOKEN-DEMO` and `ADMIN-TOKEN-DEMO` are accepted by the development security filter based on their prefix.
+The token mechanism is deliberately simple for the MVP. The cabinet demo API key is stored as a SHA-256 hash in the cabinet record. Tokens such as `DEV-TOKEN-CAB-001`, `OPERATOR-TOKEN-DEMO`, `SUPERVISOR-TOKEN-DEMO` and `ADMIN-TOKEN-DEMO` are accepted by the development security filter based on their prefix.
 
 ## Main Endpoints
 
@@ -118,7 +118,7 @@ Implemented:
 - basic development security filter
 - cabinet and operator authentication for the demo flow
 - CabinetAccess open/close endpoints
-- inventory snapshots with recognized and unknown RFID tags
+- inventory snapshots with registered RFID tags
 - inventory delta calculation
 - ToolAssignment creation/return logic
 - operator pending-assignment queries
@@ -130,6 +130,7 @@ Known limitations:
 
 - authentication is simplified and not production-grade;
 - token values are not persisted or cryptographically validated;
+- cabinet API key validation uses a simple persisted SHA-256 hash for the demonstrator;
 - simulator is intentionally minimal and HTTP-script based;
 - OpenAPI is only required to track the demonstrable MVP endpoints;
 - no dashboard, mobile app, analytics, Kubernetes or external integrations are part of this MVP.

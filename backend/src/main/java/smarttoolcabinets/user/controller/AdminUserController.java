@@ -12,12 +12,6 @@ import smarttoolcabinets.user.service.AdminUserService;
 
 import java.util.Map;
 
-/**
- * Controller admin para gestao de utilizadores.
- *
- * Exposicao base para criacao de utilizadores administrativos/operacionais.
- * Evolucao futura: politicas de permissao e validacoes detalhadas de role.
- */
 @RestController
 @RequestMapping("/api/admin/users")
 public class AdminUserController {
@@ -28,16 +22,6 @@ public class AdminUserController {
         this.adminUserService = adminUserService;
     }
 
-    /**
-     * Objetivo: criar utilizador via endpoint admin.
-     * Inputs esperados: username, fullName e role.
-     * Output esperado: id do utilizador criado.
-     * Passos logicos a implementar:
-     * 1) Validar dados de entrada.
-     * 2) Delegar criacao ao service.
-     * 3) Devolver resultado normalizado.
-     * Notas: aplicar restricoes de unicidade de username.
-     */
     @PostMapping
     public ResponseEntity<Map<String, String>> createUser(@Valid @RequestBody AdminUserCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)

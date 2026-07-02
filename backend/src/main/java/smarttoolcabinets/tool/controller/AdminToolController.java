@@ -12,12 +12,6 @@ import smarttoolcabinets.tool.service.AdminToolService;
 
 import java.util.Map;
 
-/**
- * Controller admin para gestao de ferramentas.
- *
- * Define o contrato inicial para criacao de ferramentas.
- * Evolucao futura: autorizacao por role e fluxos de manutencao completos.
- */
 @RestController
 @RequestMapping("/api/admin/tools")
 public class AdminToolController {
@@ -28,16 +22,6 @@ public class AdminToolController {
         this.adminToolService = adminToolService;
     }
 
-    /**
-     * Objetivo: criar ferramenta por endpoint admin.
-     * Inputs esperados: cabinetId, tagCode e displayName.
-     * Output esperado: id da ferramenta criada.
-     * Passos logicos a implementar:
-     * 1) Validar payload.
-     * 2) Delegar criacao ao service.
-     * 3) Mapear resultado para resposta padronizada.
-     * Notas: tratar conflito de tag com resposta apropriada.
-     */
     @PostMapping
     public ResponseEntity<Map<String, String>> createTool(@Valid @RequestBody AdminToolCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)

@@ -15,7 +15,7 @@ Fora do âmbito do intermédio:
 ## 2) Estruturas de dados essenciais
 
 ### `cabinet`
-`id`, `code` (único), `location`, `active`, `created_at`
+`id`, `code` (único), `location`, `api_key_hash`, `active`, `created_at`
 
 ### `app_user`
 `id`, `username` (único), `full_name`, `role`, `pin_hash`, `nfc_uid`, `active`, `created_at`
@@ -30,7 +30,7 @@ Fora do âmbito do intermédio:
 `id`, `cabinet_access_id`, `snapshot_type`, `captured_at`, `source`, `created_at`
 
 ### `inventory_snapshot_item`
-`id`, `snapshot_id`, `tag_code`, `tool_id` (nullable), `recognized`, `created_at`
+`id`, `snapshot_id`, `tag_code`, `tool_id`, `created_at`
 
 ### `tool_assignment`
 `id`, `tool_id`, `operator_id`, `origin_cabinet_id`, `origin_cabinet_access_id`, `assigned_at`, `returned_at`, `returned_to_cabinet_id`, `returned_via_cabinet_access_id`, `status`, `created_at`
@@ -45,9 +45,6 @@ mas o foco funcional do intermédio é o estado de custódia por operador (devol
 
 ### `supervisor_resolution_assignment`
 `supervisor_resolution_id`, `tool_assignment_id`, `created_at`
-
-### `cabinet_event`
-`id`, `cabinet_access_id`, `event_type`, `payload`, `occurred_at`, `created_at`
 
 ### `audit_log`
 `id`, `actor_type`, `actor_ref`, `action`, `entity_type`, `entity_id`, `created_at`
@@ -66,7 +63,6 @@ mas o foco funcional do intermédio é o estado de custódia por operador (devol
 - `POST /api/device/cabinet-accesses`
 - `POST /api/device/cabinet-accesses/{cabinetAccessId}/snapshots`
 - `POST /api/device/cabinet-accesses/{cabinetAccessId}/close`
-- `POST /api/device/cabinet-events`
 
 ### Operator
 - `GET /api/operators/{operatorId}/tool-assignments`
