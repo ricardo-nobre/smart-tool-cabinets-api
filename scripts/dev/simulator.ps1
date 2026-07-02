@@ -5,6 +5,20 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$TracePath = Join-Path $PSScriptRoot "simulator-api-trace.log"
+
+function Write-ApiTrace {
+    param(
+        [string]$Message,
+        [object]$Value = $null
+    )
+
+    $timestamp = [DateTimeOffset]::Now.ToString("HH:mm:ss.fff")
+    Add-Content -Path $TracePath -Value "[$timestamp] $Message"
+    if ($null -ne $Value) {
+        Add-Content -Path $TracePath -Value ($Value | ConvertTo-Json -Depth 10)
+    }
+}
 
 function Invoke-JsonApi {
     param(
@@ -19,12 +33,22 @@ function Invoke-JsonApi {
         $json = $Body | ConvertTo-Json -Depth 10
     }
 
-    Invoke-RestMethod `
-        -Method $Method `
-        -Uri "$BaseUrl$Path" `
-        -Headers $Headers `
-        -ContentType "application/json" `
-        -Body $json
+    Write-ApiTrace "$Method $Path request" $Body
+
+    try {
+        $response = Invoke-RestMethod `
+            -Method $Method `
+            -Uri "$BaseUrl$Path" `
+            -Headers $Headers `
+            -ContentType "application/json" `
+            -Body $json
+
+        Write-ApiTrace "$Method $Path response" $response
+        return $response
+    } catch {
+        Write-ApiTrace "$Method $Path error" $_.Exception.Message
+        throw
+    }
 }
 
 function Assert-Value {
@@ -665,6 +689,11 @@ function Invoke-SupervisorReview {
     param([object]$Context)
 
     $active = @(Get-ActiveAssignments -OperatorHeaders $Context.OperatorHeaders -OperatorId $Context.OperatorId)
+    if ($active.Count -eq 0) {
+        Write-Host "No active tools available for supervisor review."
+        return
+    }
+
     $selectedAssignments = Select-FromList `
         -Title "Choose broken/missing tool for supervisor review" `
         -Items $active `
@@ -732,14 +761,17 @@ function Invoke-EndOfDay {
 function Invoke-PickupPhase {
     param([object]$Context)
 
+    $firstPickup = $true
     while ($true) {
-        Write-Host ""
-        Write-Host "1. Pick up tools"
+        if ($firstPickup) {
+            Write-Host ""
+            Write-Host "1. Pick up tools"
 
-        $choice = Read-Host "Choose option"
-        if ($choice -ne "1") {
-            Write-Host "You need to pick up tools before starting work."
-            continue
+            $choice = Read-Host "Choose option"
+            if ($choice -ne "1") {
+                Write-Host "You need to pick up tools before starting work."
+                continue
+            }
         }
 
         try {
@@ -754,6 +786,7 @@ function Invoke-PickupPhase {
         if ($answer -notmatch "^[Yy]") {
             break
         }
+        $firstPickup = $false
     }
 
     Write-Host ""
@@ -770,6 +803,11 @@ function Invoke-WorkdayAfterPickup {
     Invoke-LunchPrompt -Context $Context
 
     Invoke-WorkPeriod -Label "Working until end of day"
+    $reviewAnswer = Read-Host "Any broken/missing tool to report before returning tools? [y/N]"
+    if ($reviewAnswer -match "^[Yy]") {
+        Invoke-SupervisorReview -Context $Context
+    }
+
     Invoke-EndOfDay -Context $Context
 
     Write-Host ""
@@ -778,11 +816,16 @@ function Invoke-WorkdayAfterPickup {
 }
 
 function Invoke-InteractiveScenario {
+    if (Test-Path $TracePath) {
+        Remove-Item -Path $TracePath -Force
+    }
+
     $cabinets = @(Get-InteractiveCabinets)
     $context = $null
 
     Write-Host "Interactive workday simulator"
     Write-Host "Tip: run scripts\dev\reset-db.cmd before this for a clean demo."
+    Write-Host "API trace: $TracePath"
 
     while ($null -eq $context) {
         Write-Host ""
@@ -814,11 +857,6 @@ function Invoke-InteractiveScenario {
 
     Invoke-PickupPhase -Context $context
     Invoke-WorkdayAfterPickup -Context $context
-
-    $answer = Read-Host "Open supervisor review for a broken/missing tool? [y/N]"
-    if ($answer -match "^[Yy]") {
-        Invoke-SupervisorReview -Context $context
-    }
 }
 
 Write-Host "Running simulator scenario '$Scenario' against $BaseUrl"
