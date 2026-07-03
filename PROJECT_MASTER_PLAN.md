@@ -19,7 +19,7 @@ Objetivo: terminar o projeto com dominio tecnico real pelo aluno, mantendo o rep
 
 - Branch `main` alinhada com `origin/main`.
 - M2 concluido: refatoracao de `Session` para `CabinetAccess`.
-- `mvn test` passa com 4 testes.
+- `mvn test` passa com 6 testes.
 - Greps obrigatorios nao encontram nomes antigos no codigo principal.
 - Docker Compose valida a configuracao.
 - PostgreSQL sobe em Docker e fica `healthy`.
@@ -27,6 +27,8 @@ Objetivo: terminar o projeto com dominio tecnico real pelo aluno, mantendo o rep
 - Flyway valida 2 migrations.
 - Swagger esta acessivel em `/swagger-ui.html`, `/swagger-ui/index.html` e `/v3/api-docs`.
 - Scripts HTTP de demo executam contra a API.
+- Simulador automatico principal `run-simulator-working-day.cmd` valida checkout, pendencia, devolucao e end-of-day-check limpo.
+- Simulador interativo existe como apoio adicional, com trace opcional de requests/responses HTTP.
 
 ## 3. Plano diario final - 30/06 a 11/07
 
@@ -43,7 +45,6 @@ Tarefas:
 - [x] Correr Docker Compose.
 - [x] Abrir Swagger.
 - [x] Correr scripts de demo existentes.
-- [ ] Criar `docs/student-learning-log.md`.
 - [ ] Repetir scripts numa base limpa e guardar outputs relevantes.
 
 Comandos principais:
@@ -74,7 +75,6 @@ Tecnologias a dominar:
 Entregavel:
 
 - Ambiente funcional.
-- Learning log iniciado.
 - M2 confirmado.
 - Lista de duvidas tecnicas.
 
@@ -471,20 +471,20 @@ Entregavel:
 
 - Submissao final.
 
-## 4. Regras de estudo tecnico diario
+## 4. Regras de estudo tecnico
 
-Todos os dias, antes de terminar, o aluno deve escrever no `docs/student-learning-log.md`:
+Antes da defesa, o aluno deve conseguir explicar oralmente:
 
-1. O que fiz hoje.
-2. Que ficheiros toquei.
-3. Que comandos corri.
-4. Que erro apareceu.
-5. Como corrigi.
-6. Que parte consigo explicar na defesa.
-7. Que parte ainda nao entendo.
+1. Como arrancar PostgreSQL, backend e Swagger.
+2. Como o simulador chama a API por HTTP.
+3. Como o armario e o operador autenticam.
+4. Como `CabinetAccess` abre, recebe snapshots e fecha.
+5. Como o delta BEFORE/AFTER cria ou fecha `ToolAssignment`.
+6. Como o `end-of-day-check` deteta pendencias.
+7. Como `SupervisorResolution` resolve uma pendencia.
 
 Objetivo:
-Garantir que o aluno conhece o projeto e nao apenas executa comandos.
+Garantir dominio tecnico real do fluxo principal, sem criar documentacao artificial.
 
 ## 5. Tecnologias a dominar
 
