@@ -166,4 +166,4 @@ Known limitations:
 
 - render the EA diagram and include it in the final report;
 - review OpenAPI examples against the final demo flow;
-- collect final runtime evidence for tests, Docker, Swagger and simulator flows.
+- use the evidence files under `docs/evidence/` to support the final report and presentation.
