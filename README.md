@@ -83,20 +83,33 @@ The public API and backend code use the `CabinetAccess` concept.
 With PostgreSQL and the backend running:
 
 ```powershell
+scripts\dev\run-simulator-working-day.cmd
 scripts\dev\run-simulator-normal.cmd
 scripts\dev\run-simulator-return-tool.cmd
 scripts\dev\run-simulator-missing-tool.cmd
 scripts\dev\run-simulator-all.cmd
 scripts\dev\run-simulator-interactive.cmd
+scripts\dev\watch-simulator-api-trace.cmd
 ```
 
-The scripts call the real HTTP API and exercise two demonstrator flows:
+The scripts call the real HTTP API and validate expected responses. The recommended automatic demo is:
+
+- working-day flow: operator checks out a tool, the end-of-day check detects one pending assignment, the operator returns the tool, and the final end-of-day check is clean.
+
+Additional flows:
 
 - normal flow: operator checks out a tool, creating an active ToolAssignment;
 - return-tool flow: operator checks out a tool and then returns it in a second CabinetAccess;
 - missing-tool flow: an active assignment remains pending, end-of-day check detects it, and a supervisor resolution is created.
+- interactive flow: menu-driven workday simulator with cabinet selection, admin actions and optional API trace.
 
-The `.cmd` files are shortcuts over `scripts/dev/simulator.ps1`, which accepts `normal`, `return-tool`, `missing-tool`, `all` and `interactive` scenarios.
+The `.cmd` files are shortcuts over `scripts/dev/simulator.ps1`, which accepts `normal`, `return-tool`, `missing-tool`, `working-day`, `all` and `interactive` scenarios.
+
+To show HTTP requests and responses beside the interactive simulator, open a second terminal and run:
+
+```powershell
+scripts\dev\watch-simulator-api-trace.cmd
+```
 
 The same flow can also be exercised through the browser simulator at `/simulator.html`.
 

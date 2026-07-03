@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("normal", "return-tool", "missing-tool", "all", "interactive")]
+    [ValidateSet("normal", "return-tool", "missing-tool", "working-day", "all", "interactive")]
     [string]$Scenario = "normal",
     [string]$BaseUrl = $(if ($env:STC_BASE_URL) { $env:STC_BASE_URL } else { "http://localhost:8080" })
 )
@@ -217,6 +217,57 @@ function Invoke-ReturnToolScenario {
     Write-Host "Assignments returned: $($return.Close.assignmentsReturnedCount)"
     Write-Host "Assignments after return:"
     Show-Json (Get-Assignments -OperatorHeaders $Context.OperatorHeaders -OperatorId $Context.OperatorId)
+}
+
+function Invoke-WorkingDayScenario {
+    param([object]$Context)
+
+    Write-Host "Scenario: working day checkout and return"
+    Write-Host "[1] Authenticating cabinet and operator: done"
+    Write-Host "[2] Opening first CabinetAccess for checkout"
+    Write-Host "[3] BEFORE snapshot: TAG-001, TAG-002, TAG-003"
+    Write-Host "[4] AFTER snapshot : TAG-001, TAG-003"
+
+    $checkout = Invoke-CabinetAccessFlow `
+        -DeviceHeaders $Context.DeviceHeaders `
+        -OperatorId $Context.OperatorId `
+        -BeforeTags @("TAG-001", "TAG-002", "TAG-003") `
+        -AfterTags @("TAG-001", "TAG-003")
+
+    Assert-Value "checkout operationalResult" $checkout.Close.operationalResult "CLOSED_WITH_ASSIGNMENTS"
+    Assert-Value "checkout assignmentsCreatedCount" $checkout.Close.assignmentsCreatedCount 1
+
+    Write-Host "[OK] Checkout CabinetAccess closed: $($checkout.Access.cabinetAccessId)"
+    Write-Host "[OK] TAG-002 assigned to operator as ACTIVE"
+
+    $afterCheckout = Get-EndOfDay -OperatorHeaders $Context.OperatorHeaders -OperatorId $Context.OperatorId
+    Assert-Value "pendingAssignmentsCount after checkout" $afterCheckout.pendingAssignmentsCount 1
+    Write-Host "[OK] End-of-day check detects 1 pending assignment before return"
+
+    Write-Host "[5] Opening second CabinetAccess for return"
+    Write-Host "[6] BEFORE snapshot: TAG-001, TAG-003"
+    Write-Host "[7] AFTER snapshot : TAG-001, TAG-002, TAG-003"
+
+    $return = Invoke-CabinetAccessFlow `
+        -DeviceHeaders $Context.DeviceHeaders `
+        -OperatorId $Context.OperatorId `
+        -BeforeTags @("TAG-001", "TAG-003") `
+        -AfterTags @("TAG-001", "TAG-002", "TAG-003")
+
+    Assert-Value "return operationalResult" $return.Close.operationalResult "CLOSED_WITH_ASSIGNMENTS"
+    Assert-Value "return assignmentsReturnedCount" $return.Close.assignmentsReturnedCount 1
+
+    Write-Host "[OK] Return CabinetAccess closed: $($return.Access.cabinetAccessId)"
+    Write-Host "[OK] TAG-002 marked as RETURNED"
+
+    Write-Host "[8] Running final end-of-day-check"
+    $finalEndOfDay = Get-EndOfDay -OperatorHeaders $Context.OperatorHeaders -OperatorId $Context.OperatorId
+    Assert-Value "final pendingAssignmentsCount" $finalEndOfDay.pendingAssignmentsCount 0
+    Assert-Value "final allowExit" $finalEndOfDay.allowExit $true
+
+    Write-Host "[OK] No pending assignments"
+    Write-Host "[OK] Operator can exit"
+    Show-Json $finalEndOfDay
 }
 
 function Invoke-MissingToolScenario {
@@ -872,7 +923,10 @@ switch ($Scenario) {
     "normal" { Invoke-NormalScenario -Context $context }
     "return-tool" { Invoke-ReturnToolScenario -Context $context }
     "missing-tool" { Invoke-MissingToolScenario -Context $context }
+    "working-day" { Invoke-WorkingDayScenario -Context $context }
     "all" {
+        Invoke-WorkingDayScenario -Context $context
+        Write-Host ""
         Invoke-NormalScenario -Context $context
         Write-Host ""
         Invoke-ReturnToolScenario -Context $context
