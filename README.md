@@ -150,8 +150,8 @@ Implemented:
 - ToolAssignment creation/return logic
 - operator pending-assignment queries
 - supervisor resolution endpoint
-- minimal simulator scripts
-- focused unit test for inventory delta
+- automatic and interactive simulator scripts
+- focused tests for delta, checkout, return, end-of-day checks, supervisor resolution and invalid snapshots
 
 Known limitations:
 
@@ -166,4 +166,4 @@ Known limitations:
 
 - render the EA diagram and include it in the final report;
 - review OpenAPI examples against the final demo flow;
-- add more tests for tool return, supervisor resolution and invalid snapshots.
+- collect final runtime evidence for tests, Docker, Swagger and simulator flows.

@@ -19,7 +19,7 @@ Objetivo: terminar o projeto com dominio tecnico real pelo aluno, mantendo o rep
 
 - Branch `main` alinhada com `origin/main`.
 - M2 concluido: refatoracao de `Session` para `CabinetAccess`.
-- `mvn test` passa com 6 testes.
+- `mvn test` passa com 10 testes.
 - Greps obrigatorios nao encontram nomes antigos no codigo principal.
 - Docker Compose valida a configuracao.
 - PostgreSQL sobe em Docker e fica `healthy`.
