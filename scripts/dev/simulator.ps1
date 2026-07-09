@@ -222,7 +222,7 @@ function Invoke-ReturnToolScenario {
 function Invoke-WorkingDayScenario {
     param([object]$Context)
 
-    Write-Host "Scenario: working day checkout and return"
+    Write-Host "Scenario: working day checkout, exchange and final return"
     Write-Host "[1] Authenticating cabinet and operator: done"
     Write-Host "[2] Opening first CabinetAccess for checkout"
     Write-Host "[3] BEFORE snapshot: TAG-001, TAG-002, TAG-003"
@@ -242,25 +242,47 @@ function Invoke-WorkingDayScenario {
 
     $afterCheckout = Get-EndOfDay -OperatorHeaders $Context.OperatorHeaders -OperatorId $Context.OperatorId
     Assert-Value "pendingAssignmentsCount after checkout" $afterCheckout.pendingAssignmentsCount 1
-    Write-Host "[OK] End-of-day check detects 1 pending assignment before return"
+    Write-Host "[OK] End-of-day check detects 1 pending assignment before exchange"
 
-    Write-Host "[5] Opening second CabinetAccess for return"
-    Write-Host "[6] BEFORE snapshot: TAG-001, TAG-003"
+    Write-Host "[5] Opening second CabinetAccess for tool exchange"
+    Write-Host "[6] BEFORE snapshot: TAG-001, TAG-003, TAG-004"
     Write-Host "[7] AFTER snapshot : TAG-001, TAG-002, TAG-003"
 
-    $return = Invoke-CabinetAccessFlow `
+    $exchange = Invoke-CabinetAccessFlow `
         -DeviceHeaders $Context.DeviceHeaders `
         -OperatorId $Context.OperatorId `
-        -BeforeTags @("TAG-001", "TAG-003") `
+        -BeforeTags @("TAG-001", "TAG-003", "TAG-004") `
         -AfterTags @("TAG-001", "TAG-002", "TAG-003")
 
-    Assert-Value "return operationalResult" $return.Close.operationalResult "CLOSED_WITH_ASSIGNMENTS"
-    Assert-Value "return assignmentsReturnedCount" $return.Close.assignmentsReturnedCount 1
+    Assert-Value "exchange operationalResult" $exchange.Close.operationalResult "CLOSED_WITH_ASSIGNMENTS"
+    Assert-Value "exchange assignmentsReturnedCount" $exchange.Close.assignmentsReturnedCount 1
+    Assert-Value "exchange assignmentsCreatedCount" $exchange.Close.assignmentsCreatedCount 1
 
-    Write-Host "[OK] Return CabinetAccess closed: $($return.Access.cabinetAccessId)"
+    Write-Host "[OK] Exchange CabinetAccess closed: $($exchange.Access.cabinetAccessId)"
     Write-Host "[OK] TAG-002 marked as RETURNED"
+    Write-Host "[OK] TAG-004 assigned to operator as ACTIVE"
 
-    Write-Host "[8] Running final end-of-day-check"
+    $afterExchange = Get-EndOfDay -OperatorHeaders $Context.OperatorHeaders -OperatorId $Context.OperatorId
+    Assert-Value "pendingAssignmentsCount after exchange" $afterExchange.pendingAssignmentsCount 1
+    Write-Host "[OK] End-of-day check now detects TAG-004 as the pending assignment"
+
+    Write-Host "[8] Opening third CabinetAccess for final return"
+    Write-Host "[9] BEFORE snapshot: TAG-001, TAG-002, TAG-003"
+    Write-Host "[10] AFTER snapshot : TAG-001, TAG-002, TAG-003, TAG-004"
+
+    $finalReturn = Invoke-CabinetAccessFlow `
+        -DeviceHeaders $Context.DeviceHeaders `
+        -OperatorId $Context.OperatorId `
+        -BeforeTags @("TAG-001", "TAG-002", "TAG-003") `
+        -AfterTags @("TAG-001", "TAG-002", "TAG-003", "TAG-004")
+
+    Assert-Value "final return operationalResult" $finalReturn.Close.operationalResult "CLOSED_WITH_ASSIGNMENTS"
+    Assert-Value "final return assignmentsReturnedCount" $finalReturn.Close.assignmentsReturnedCount 1
+
+    Write-Host "[OK] Final return CabinetAccess closed: $($finalReturn.Access.cabinetAccessId)"
+    Write-Host "[OK] TAG-004 marked as RETURNED"
+
+    Write-Host "[11] Running final end-of-day-check"
     $finalEndOfDay = Get-EndOfDay -OperatorHeaders $Context.OperatorHeaders -OperatorId $Context.OperatorId
     Assert-Value "final pendingAssignmentsCount" $finalEndOfDay.pendingAssignmentsCount 0
     Assert-Value "final allowExit" $finalEndOfDay.allowExit $true

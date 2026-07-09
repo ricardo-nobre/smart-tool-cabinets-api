@@ -94,7 +94,7 @@ scripts\dev\watch-simulator-api-trace.cmd
 
 The scripts call the real HTTP API and validate expected responses. The recommended automatic demo is:
 
-- working-day flow: operator checks out a tool, the end-of-day check detects one pending assignment, the operator returns the tool, and the final end-of-day check is clean.
+- working-day flow: operator checks out a tool, exchanges one returned tool for another in the same CabinetAccess, returns the remaining active tool, and the final end-of-day check is clean.
 
 Additional flows:
 
