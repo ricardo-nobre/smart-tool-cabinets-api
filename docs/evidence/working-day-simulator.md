@@ -1,13 +1,11 @@
 # Working-Day Simulator Evidence
 
-Date: 2026-07-03
-
-Update note: on 2026-07-09 the working-day simulator scenario was extended to include a same-access tool exchange. The runtime output below documents the current expected flow shape; concrete UUIDs should be refreshed after running the command again with Docker and the backend available.
+Date: 2026-07-10
 
 Command:
 
 ```powershell
-scripts\dev\run-simulator-working-day.cmd
+powershell -ExecutionPolicy Bypass -File scripts\dev\simulator.ps1
 ```
 
 Precondition:
@@ -16,46 +14,50 @@ Precondition:
 - Backend running with profile `dev`.
 - Database reset before execution.
 
-Current flow:
+Output:
 
 ```text
+Running simulator against http://localhost:8080
 Scenario: working day checkout, exchange and final return
-[1] Authenticating cabinet and operator: done
+[1] Cabinet and operator authenticated
 [2] Opening first CabinetAccess for checkout
 [3] BEFORE snapshot: TAG-001, TAG-002, TAG-003
 [4] AFTER snapshot : TAG-001, TAG-003
-[OK] Checkout CabinetAccess closed: <cabinetAccessId>
+[OK] Checkout CabinetAccess closed: 602c155c-5136-45cf-a7b8-ddf816bc6394
 [OK] TAG-002 assigned to operator as ACTIVE
 [OK] End-of-day check detects 1 pending assignment before exchange
 [5] Opening second CabinetAccess for tool exchange
 [6] BEFORE snapshot: TAG-001, TAG-003, TAG-004
 [7] AFTER snapshot : TAG-001, TAG-002, TAG-003
-[OK] Exchange CabinetAccess closed: <cabinetAccessId>
+[OK] Exchange CabinetAccess closed: d9e19ad7-ccce-4f2c-afe7-7e389f8f0708
 [OK] TAG-002 marked as RETURNED
 [OK] TAG-004 assigned to operator as ACTIVE
 [OK] End-of-day check now detects TAG-004 as the pending assignment
 [8] Opening third CabinetAccess for final return
 [9] BEFORE snapshot: TAG-001, TAG-002, TAG-003
 [10] AFTER snapshot : TAG-001, TAG-002, TAG-003, TAG-004
-[OK] Final return CabinetAccess closed: <cabinetAccessId>
+[OK] Final return CabinetAccess closed: 2d9125e7-18eb-4f22-8719-7c06f66f9809
 [OK] TAG-004 marked as RETURNED
 [11] Running final end-of-day-check
 [OK] No pending assignments
 [OK] Operator can exit
 {
-    "operatorId": "00000000-0000-0000-0000-000000000201",
-    "pendingAssignments": [],
-    "pendingAssignmentsCount": 0,
-    "requireSupervisorReview": false,
-    "allowExit": true
+    "operatorId":  "00000000-0000-0000-0000-000000000201",
+    "pendingAssignments":  [
+
+                           ],
+    "pendingAssignmentsCount":  0,
+    "requireSupervisorReview":  false,
+    "allowExit":  true
 }
 ```
 
 Validated behavior:
 
-- cabinet/operator authentication works;
+- cabinet authentication works;
+- operator authentication works;
 - CabinetAccess opens and closes;
-- BEFORE/AFTER snapshots are accepted;
+- BEFORE and AFTER snapshots are accepted;
 - delta detects `TAG-002` as removed;
 - ToolAssignment is created as active;
 - end-of-day-check detects the temporary pending assignment;

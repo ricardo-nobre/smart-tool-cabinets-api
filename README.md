@@ -72,38 +72,17 @@ The token mechanism is deliberately simple for the MVP. The cabinet demo API key
 
 The public API and backend code use the `CabinetAccess` concept.
 
-## Simulator Scripts
+## Simulator
 
 With PostgreSQL and the backend running:
 
 ```powershell
-scripts\dev\run-simulator-working-day.cmd
-scripts\dev\run-simulator-normal.cmd
-scripts\dev\run-simulator-return-tool.cmd
-scripts\dev\run-simulator-missing-tool.cmd
-scripts\dev\run-simulator-all.cmd
-scripts\dev\run-simulator-interactive.cmd
-scripts\dev\watch-simulator-api-trace.cmd
+powershell -ExecutionPolicy Bypass -File scripts\dev\simulator.ps1
 ```
 
-The scripts call the real HTTP API and validate expected responses. The recommended automatic demo is:
+The simulator calls the real HTTP API and validates expected responses. The official demo flow is:
 
 - working-day flow: operator checks out a tool, exchanges one returned tool for another in the same CabinetAccess, returns the remaining active tool, and the final end-of-day check is clean.
-
-Additional flows:
-
-- normal flow: operator checks out a tool, creating an active ToolAssignment;
-- return-tool flow: operator checks out a tool and then returns it in a second CabinetAccess;
-- missing-tool flow: an active assignment remains pending, end-of-day check detects it, and a supervisor resolution is created.
-- interactive flow: menu-driven workday simulator with cabinet selection, admin actions and optional API trace.
-
-The `.cmd` files are shortcuts over `scripts/dev/simulator.ps1`, which accepts `normal`, `return-tool`, `missing-tool`, `working-day`, `all` and `interactive` scenarios.
-
-To show HTTP requests and responses beside the interactive simulator, open a second terminal and run:
-
-```powershell
-scripts\dev\watch-simulator-api-trace.cmd
-```
 
 For repeated local demonstrations, reset the database first so previous active assignments do not affect the next run:
 
@@ -142,7 +121,7 @@ Implemented:
 - ToolAssignment creation/return logic
 - operator pending-assignment queries
 - supervisor resolution endpoint
-- automatic and interactive simulator scripts
+- single HTTP simulator script
 - focused tests for delta, checkout, return, end-of-day checks, supervisor resolution and invalid snapshots
 
 Known limitations:
