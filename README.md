@@ -46,12 +46,6 @@ Swagger UI is available in the `dev` profile:
 http://localhost:8080/swagger-ui.html
 ```
 
-A browser-based simulator is also available in the `dev` profile:
-
-```text
-http://localhost:8080/simulator.html
-```
-
 ## Demo Data
 
 Flyway seeds minimal local data for the demonstrator:
@@ -110,8 +104,6 @@ To show HTTP requests and responses beside the interactive simulator, open a sec
 ```powershell
 scripts\dev\watch-simulator-api-trace.cmd
 ```
-
-The same flow can also be exercised through the browser simulator at `/simulator.html`.
 
 For repeated local demonstrations, reset the database first so previous active assignments do not affect the next run:
 

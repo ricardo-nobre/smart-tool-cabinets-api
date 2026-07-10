@@ -47,7 +47,6 @@ public class SecurityConfig {
                         .requestMatchers(isDevProfile ? "/v3/api-docs/**" : "/__swagger-disabled__").permitAll()
                         .requestMatchers(isDevProfile ? "/swagger-ui/**" : "/__swagger-disabled__").permitAll()
                         .requestMatchers(isDevProfile ? "/swagger-ui.html" : "/__swagger-disabled__").permitAll()
-                        .requestMatchers(isDevProfile ? "/simulator.html" : "/__simulator-disabled__").permitAll()
                         .requestMatchers("/api/device/**").hasRole("DEVICE")
                         .requestMatchers("/api/operators/**").hasAnyRole(UserRole.OPERATOR, UserRole.SUPERVISOR, UserRole.ADMIN)
                         .requestMatchers("/api/supervisor/**").hasAnyRole(UserRole.SUPERVISOR, UserRole.ADMIN)
