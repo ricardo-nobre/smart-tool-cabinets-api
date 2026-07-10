@@ -2,9 +2,7 @@
 
 Backend API for an academic MVP about communication between smart tool cabinets and a central system.
 
-The project focuses on a demonstrable operational flow: cabinet authentication, operator authentication, short cabinet accesses, RFID inventory snapshots, custody tracking through tool assignments, end-of-day pending checks and supervisor resolutions.
-
-This is not intended to be a commercial product. Security, auditing and device integration are intentionally simplified for the final project demonstrator.
+The demonstrable flow covers cabinet authentication, operator authentication, `CabinetAccess`, RFID snapshots, inventory delta, `ToolAssignment` custody and end-of-day validation.
 
 ## Stack
 
@@ -13,19 +11,11 @@ This is not intended to be a commercial product. Security, auditing and device i
 - Maven
 - PostgreSQL
 - Flyway
-- Spring Web
-- Spring Data JPA
-- Spring Security
+- Spring Web / Data JPA / Security
 - Bean Validation
 - OpenAPI / Swagger UI
 
-## Local Requirements
-
-- Java 21
-- Maven 3.9+
-- Docker / Docker Compose
-
-## Quick Start
+## Run Locally
 
 Start PostgreSQL:
 
@@ -33,31 +23,41 @@ Start PostgreSQL:
 docker compose up -d
 ```
 
-Run the backend with the development profile:
+Start the backend:
 
 ```powershell
 cd backend
 mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
-Swagger UI is available in the `dev` profile:
+Swagger UI:
 
 ```text
 http://localhost:8080/swagger-ui.html
 ```
 
-## Demo Data
+## Demo
 
-Flyway seeds minimal local data for the demonstrator:
+Seed data is created by Flyway:
 
 - cabinet: `CAB-001`
-- device API key for the demo auth flow: `DEV-CAB-001`
-- operator: `operator1`, PIN `1234` stored as a SHA-256 hash
-- supervisor: `supervisor1`
-- admin: `admin`
-- demo RFID tags: `TAG-001`, `TAG-002`, `TAG-003`, `TAG-004`
+- device API key: `DEV-CAB-001`
+- operator PIN: `1234`
+- RFID tags: `TAG-001`, `TAG-002`, `TAG-003`, `TAG-004`
 
-The token mechanism is deliberately simple for the MVP. The cabinet demo API key is stored as a SHA-256 hash in the cabinet record. Tokens such as `DEV-TOKEN-CAB-001`, `OPERATOR-TOKEN-DEMO`, `SUPERVISOR-TOKEN-DEMO` and `ADMIN-TOKEN-DEMO` are accepted by the development security filter based on their prefix.
+Run the simulator:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\dev\simulator.ps1
+```
+
+The simulator calls the real HTTP API and validates the complete working-day flow: checkout, tool exchange in the same `CabinetAccess`, final return and clean end-of-day check.
+
+To reset local demo data:
+
+```powershell
+scripts\dev\reset-db.cmd
+```
 
 ## Main Endpoints
 
@@ -70,71 +70,15 @@ The token mechanism is deliberately simple for the MVP. The cabinet demo API key
 - `GET /api/operators/{operatorId}/end-of-day-check`
 - `POST /api/supervisor/resolutions`
 
-The public API and backend code use the `CabinetAccess` concept.
-
-## Simulator
-
-With PostgreSQL and the backend running:
+## Validation
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File scripts\dev\simulator.ps1
-```
-
-The simulator calls the real HTTP API and validates expected responses. The official demo flow is:
-
-- working-day flow: operator checks out a tool, exchanges one returned tool for another in the same CabinetAccess, returns the remaining active tool, and the final end-of-day check is clean.
-
-For repeated local demonstrations, reset the database first so previous active assignments do not affect the next run:
-
-```powershell
-scripts\dev\reset-db.cmd
-```
-
-## Useful Commands
-
-```powershell
+cd backend
 mvn test
 ```
 
-```powershell
-docker compose ps
-```
+Runtime evidence is kept in `docs/evidence/`.
 
-```powershell
-scripts\dev\start-local.cmd
-scripts\dev\stop-local.cmd
-```
+## Scope
 
-`scripts\dev\reset-db.cmd` recreates the local PostgreSQL volume and should only be used when local data can be discarded.
-
-## Current State
-
-Implemented:
-
-- Spring Boot backend structure by domain
-- PostgreSQL schema managed by Flyway
-- basic development security filter
-- cabinet and operator authentication for the demo flow
-- CabinetAccess open/close endpoints
-- inventory snapshots with registered RFID tags
-- inventory delta calculation
-- ToolAssignment creation/return logic
-- operator pending-assignment queries
-- supervisor resolution endpoint
-- single HTTP simulator script
-- focused tests for delta, checkout, return, end-of-day checks, supervisor resolution and invalid snapshots
-
-Known limitations:
-
-- authentication is simplified and not production-grade;
-- token values are not persisted or cryptographically validated;
-- cabinet API key validation uses a simple persisted SHA-256 hash for the demonstrator;
-- simulator is intentionally minimal and HTTP-script based;
-- OpenAPI is only required to track the demonstrable MVP endpoints;
-- no dashboard, mobile app, analytics, Kubernetes or external integrations are part of this MVP.
-
-## Next Steps
-
-- render the EA diagram and include it in the final report;
-- review OpenAPI examples against the final demo flow;
-- use the evidence files under `docs/evidence/` to support the final report and presentation.
+This is not a commercial product. Authentication, token handling, auditing and device integration are simplified for the academic demonstrator. There is no dashboard, mobile app, analytics, Kubernetes or external hardware integration in this MVP.
