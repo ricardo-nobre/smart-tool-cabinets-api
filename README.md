@@ -43,4 +43,4 @@ Com o backend em execução, noutro terminal:
 powershell -ExecutionPolicy Bypass -File scripts\dev\simulator.ps1
 ```
 
-Documentação técnica, diagramas e registos de validação encontram-se em `docs/`.
+Documentação técnica e diagramas encontram-se em `docs/`.
