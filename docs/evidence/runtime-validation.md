@@ -14,9 +14,9 @@ mvn test
 Result:
 
 ```text
-Tests run: 27, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 28, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
-Total time: 27.142 s
+Total time: 38.388 s
 ```
 
 ## Docker Compose Configuration

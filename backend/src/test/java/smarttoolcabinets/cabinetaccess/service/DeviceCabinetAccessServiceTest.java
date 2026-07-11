@@ -332,4 +332,99 @@ class DeviceCabinetAccessServiceTest {
         assertThat(endOfDay.pendingAssignmentsCount()).isEqualTo(1);
         assertThat(endOfDay.allowExit()).isFalse();
     }
+
+    @Test
+    void pendingReviewAssignmentCanReturnToOriginCabinetWithoutSupervisor() {
+        String suffix = UUID.randomUUID().toString().replace("-", "").toUpperCase();
+        Cabinet originCabinet = cabinetRepository.save(Cabinet.newCabinet("CAB-A-" + suffix, "Origin Cabinet " + suffix, "Lab"));
+        Cabinet otherCabinet = cabinetRepository.save(Cabinet.newCabinet("CAB-B-" + suffix, "Other Cabinet " + suffix, "Lab"));
+        User operator = userRepository.save(User.newUser("operator-" + suffix, "Operator Test", "OPERATOR", "1234-" + suffix, null));
+        Tool tool = toolRepository.save(Tool.newTool(originCabinet.getId(), "TAG-REVIEW-RETURN-" + suffix, "Review Return Tool"));
+
+        var checkoutAccess = deviceCabinetAccessService.openCabinetAccess(new OpenCabinetAccessRequest(originCabinet.getCode(), operator.getId()));
+        inventoryService.createSnapshot(checkoutAccess.cabinetAccessId().toString(), new CreateSnapshotRequest(
+                "BEFORE",
+                OffsetDateTime.now(),
+                "TEST",
+                List.of(tool.getTagCode())
+        ));
+        inventoryService.createSnapshot(checkoutAccess.cabinetAccessId().toString(), new CreateSnapshotRequest(
+                "AFTER",
+                OffsetDateTime.now(),
+                "TEST",
+                List.of()
+        ));
+
+        deviceCabinetAccessService.closeCabinetAccess(checkoutAccess.cabinetAccessId().toString());
+
+        ToolAssignment activeAssignment = toolAssignmentRepository.findByToolIdAndStatus(tool.getId(), ToolAssignmentStatus.ACTIVE)
+                .orElseThrow();
+        UUID assignmentId = activeAssignment.getId();
+        assertThat(assignmentsForTool(tool.getId())).hasSize(1);
+
+        var wrongCabinetAccess = deviceCabinetAccessService.openCabinetAccess(new OpenCabinetAccessRequest(otherCabinet.getCode(), operator.getId()));
+        inventoryService.createSnapshot(wrongCabinetAccess.cabinetAccessId().toString(), new CreateSnapshotRequest(
+                "BEFORE",
+                OffsetDateTime.now(),
+                "TEST",
+                List.of()
+        ));
+        inventoryService.createSnapshot(wrongCabinetAccess.cabinetAccessId().toString(), new CreateSnapshotRequest(
+                "AFTER",
+                OffsetDateTime.now(),
+                "TEST",
+                List.of(tool.getTagCode())
+        ));
+
+        deviceCabinetAccessService.closeCabinetAccess(wrongCabinetAccess.cabinetAccessId().toString());
+
+        ToolAssignment pendingReviewAssignment = toolAssignmentRepository.findById(assignmentId).orElseThrow();
+        assertThat(pendingReviewAssignment.getStatus()).isEqualTo(ToolAssignmentStatus.PENDING_REVIEW);
+        assertThat(pendingReviewAssignment.getReturnedToCabinetId()).isEqualTo(otherCabinet.getId());
+        assertThat(pendingReviewAssignment.getReturnedViaCabinetAccessId()).isEqualTo(wrongCabinetAccess.cabinetAccessId());
+
+        var blockedEndOfDay = operatorQueryService.endOfDayCheck(operator.getId());
+        assertThat(blockedEndOfDay.pendingAssignmentsCount()).isEqualTo(1);
+        assertThat(blockedEndOfDay.requireSupervisorReview()).isTrue();
+        assertThat(blockedEndOfDay.allowExit()).isFalse();
+
+        var originReturnAccess = deviceCabinetAccessService.openCabinetAccess(new OpenCabinetAccessRequest(originCabinet.getCode(), operator.getId()));
+        inventoryService.createSnapshot(originReturnAccess.cabinetAccessId().toString(), new CreateSnapshotRequest(
+                "BEFORE",
+                OffsetDateTime.now(),
+                "TEST",
+                List.of()
+        ));
+        inventoryService.createSnapshot(originReturnAccess.cabinetAccessId().toString(), new CreateSnapshotRequest(
+                "AFTER",
+                OffsetDateTime.now(),
+                "TEST",
+                List.of(tool.getTagCode())
+        ));
+
+        var returnClose = deviceCabinetAccessService.closeCabinetAccess(originReturnAccess.cabinetAccessId().toString());
+
+        assertThat(returnClose.assignmentsReturnedCount()).isEqualTo(1);
+        assertThat(returnClose.discrepancyFlag()).isFalse();
+
+        ToolAssignment returnedAssignment = toolAssignmentRepository.findById(assignmentId).orElseThrow();
+        assertThat(returnedAssignment.getStatus()).isEqualTo(ToolAssignmentStatus.RETURNED);
+        assertThat(returnedAssignment.getReturnedToCabinetId()).isEqualTo(originCabinet.getId());
+        assertThat(returnedAssignment.getReturnedViaCabinetAccessId()).isEqualTo(originReturnAccess.cabinetAccessId());
+        assertThat(returnedAssignment.getReturnedAt()).isNotNull();
+        assertThat(toolAssignmentRepository.findByToolIdAndStatus(tool.getId(), ToolAssignmentStatus.ACTIVE)).isEmpty();
+        assertThat(toolAssignmentRepository.findByToolIdAndStatus(tool.getId(), ToolAssignmentStatus.PENDING_REVIEW)).isEmpty();
+        assertThat(assignmentsForTool(tool.getId())).hasSize(1);
+
+        var cleanEndOfDay = operatorQueryService.endOfDayCheck(operator.getId());
+        assertThat(cleanEndOfDay.pendingAssignmentsCount()).isZero();
+        assertThat(cleanEndOfDay.requireSupervisorReview()).isFalse();
+        assertThat(cleanEndOfDay.allowExit()).isTrue();
+    }
+
+    private List<ToolAssignment> assignmentsForTool(UUID toolId) {
+        return toolAssignmentRepository.findAll().stream()
+                .filter(assignment -> assignment.getToolId().equals(toolId))
+                .toList();
+    }
 }

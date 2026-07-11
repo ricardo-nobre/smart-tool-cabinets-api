@@ -189,13 +189,13 @@ public class DeviceCabinetAccessService {
             }
 
             for (UUID toolId : delta.returned()) {
-                Optional<ToolAssignment> activeAssignmentOpt = toolAssignmentRepository.findByToolIdAndStatus(toolId, ToolAssignmentStatus.ACTIVE);
-                if (activeAssignmentOpt.isEmpty()) {
+                Optional<ToolAssignment> openAssignmentOpt = toolAssignmentRepository.findFirstByToolIdAndStatusIn(toolId, ToolAssignmentStatus.OPEN);
+                if (openAssignmentOpt.isEmpty()) {
                     discrepancyFlag = true;
                     continue;
                 }
 
-                ToolAssignment assignment = activeAssignmentOpt.get();
+                ToolAssignment assignment = openAssignmentOpt.get();
                 if (assignment.getOriginCabinetId().equals(s.getCabinetId())) {
                     assignment.markReturned(s.getCabinetId(), s.getId(), OffsetDateTime.now());
                     assignmentsReturnedCount++;
@@ -249,4 +249,3 @@ public class DeviceCabinetAccessService {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }
-

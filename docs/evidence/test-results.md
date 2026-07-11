@@ -12,9 +12,9 @@ mvn test
 Result:
 
 ```text
-Tests run: 27, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 28, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
-Total time: 27.142 s
+Total time: 38.388 s
 ```
 
 Covered rules:
@@ -28,6 +28,8 @@ Covered rules:
 - a tool with an `ACTIVE` assignment cannot create a second open assignment;
 - a tool with a `PENDING_REVIEW` assignment cannot create a second open assignment;
 - a tool detected in a different cabinet becomes `PENDING_REVIEW` and blocks `allowExit`;
+- a `PENDING_REVIEW` assignment becomes `RETURNED` when the tool later returns to the origin cabinet without supervisor intervention;
+- the next end-of-day-check allows exit after that corrected physical return when no other pending assignments remain;
 - end-of-day-check allows exit with no pending assignments;
 - end-of-day-check reports `ACTIVE` and `PENDING_REVIEW` assignments as pending;
 - end-of-day-check rejects an unknown operator;

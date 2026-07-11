@@ -17,6 +17,7 @@ Este documento resume as regras finais do MVP da API de smart tool cabinets.
 4. Uma ferramenta inativa (`tool.active=false`) não deve originar nova assignment operacional.
 5. Uma ferramenta devolvida ao armário de origem passa para `RETURNED`.
 6. Uma ferramenta detetada noutro armário passa para `PENDING_REVIEW` e guarda o contexto da deteção.
+7. Uma `ToolAssignment` `PENDING_REVIEW` pode passar para `RETURNED` se a ferramenta for posteriormente devolvida ao armário de origem, sem necessidade de `SupervisorResolution`.
 
 ## End-Of-Day Check
 

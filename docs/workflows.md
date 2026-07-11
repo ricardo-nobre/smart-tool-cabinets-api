@@ -17,11 +17,11 @@
 
 ## Devolução
 
-`AFTER - BEFORE` procura uma assignment `ACTIVE` da ferramenta:
+`AFTER - BEFORE` procura uma assignment aberta da ferramenta: `ACTIVE` ou `PENDING_REVIEW`.
 
-- se reaparecer no armário de origem, passa para `RETURNED`;
-- se reaparecer noutro armário, passa para `PENDING_REVIEW`;
-- se não existir assignment ativa, o close fecha com discrepância.
+- se reaparecer no armário de origem, a assignment `ACTIVE` ou `PENDING_REVIEW` passa para `RETURNED`;
+- se reaparecer noutro armário, a assignment passa ou permanece `PENDING_REVIEW`;
+- se não existir assignment aberta, o close fecha com discrepância.
 
 ## Fim do Dia
 
