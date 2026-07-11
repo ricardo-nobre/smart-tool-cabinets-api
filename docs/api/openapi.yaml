@@ -125,7 +125,8 @@ paths:
       summary: Fechar CabinetAccess e devolver resultado operacional
       description: |
         O fecho físico ocorre sempre.
-        O resultado operacional reflete apenas se as ferramentas foram devolvidas ou não devolvidas.
+        O endpoint fecha o CabinetAccess, calcula o delta e devolve o resultado operacional.
+        CLOSED_WITH_DISCREPANCY também pode indicar snapshots incompletos ou inconsistências na atualização da custódia.
       security:
         - bearerDeviceAuth: []
       parameters:
@@ -549,7 +550,7 @@ components:
       type: object
       required: [operatorId, supervisorId, assignmentId, reasonCode, reportText, decisionAt]
       description: |
-        Decisão humana formal do supervisor para uma única ToolAssignment.
+        Resolução formal do supervisor para uma pendência.
         Apenas assignments em ACTIVE ou PENDING_REVIEW podem ser resolvidas.
         allowExit é recalculado posteriormente pelo end-of-day-check.
       properties:
@@ -590,4 +591,3 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreateSupervisorResolutionResponse'
-

@@ -8,7 +8,8 @@ import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 
 /**
- * Tabela de ligacao N:N entre resolucao de supervisor e atribuicoes.
+ * Associação entre uma SupervisorResolution e uma ToolAssignment.
+ * A V4 impõe unicidade nos dois identificadores.
  */
 @Entity
 @Table(name = "supervisor_resolution_assignment")
@@ -35,4 +36,3 @@ public class SupervisorResolutionAssignment {
         return id;
     }
 }
-

@@ -1,12 +1,12 @@
 # Test Results Evidence
 
-Date: 2026-07-11
+Date: 2026-07-11 22:55 +01:00
 
 Command:
 
 ```powershell
 cd backend
-mvn test
+mvn clean test
 ```
 
 Result:
@@ -14,7 +14,7 @@ Result:
 ```text
 Tests run: 28, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
-Total time: 38.388 s
+Total time: 49.960 s
 ```
 
 Covered rules:
@@ -41,4 +41,5 @@ Covered rules:
 - `TOOL_LOST`, `TOOL_DAMAGED` and `RFID_FAILURE` deactivate the tool;
 - `MANUAL_VERIFICATION` preserves the current tool active state;
 - `SupervisorResolution` request/response use singular assignment fields and do not expose `allowExit`;
+- admin-created tool RFID tags are normalized to uppercase and can be recognized by inventory snapshots;
 - invalid snapshot sequences are rejected.

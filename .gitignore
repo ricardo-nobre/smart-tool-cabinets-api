@@ -8,6 +8,9 @@ target/
 # Logs
 *.log
 logs/
+backend-run.out.log
+backend-run.err.log
+scripts/dev/simulator-api-trace.log
 
 # IDEs
 .idea/
@@ -34,6 +37,7 @@ application-dev-local.properties
 Relatórios e ficheiros/
 *.pdf
 *.docx
+*.zip
 
 # Database / runtime files
 *.db
@@ -49,7 +53,9 @@ docker-compose.override.yml
 tmp/
 temp/
 *.bak
+*.tmp
 *.swp
+~$*
 
 # Generated files
 backend/target/

@@ -10,6 +10,7 @@ import smarttoolcabinets.tool.dto.AdminToolCreateRequest;
 import smarttoolcabinets.tool.repository.ToolRepository;
 import smarttoolcabinets.user.domain.UserRole;
 
+import java.util.Locale;
 import java.util.UUID;
 
 @Service
@@ -27,24 +28,23 @@ public class AdminToolService {
 
     @Transactional
     public String createTool(AdminToolCreateRequest request) {
-        UUID uuid = request.cabinetId();
-        if(!cabinetRepository.existsById(uuid)) {
-            throw new IllegalArgumentException("Cabinet not found: " + uuid);
+        UUID cabinetId = request.cabinetId();
+        if (!cabinetRepository.existsById(cabinetId)) {
+            throw new IllegalArgumentException("Cabinet not found: " + cabinetId);
         }
-        String code = request.tagCode().trim();
-        if(toolRepository.existsByTagCode(code)) {
-            throw new IllegalArgumentException("Tool tag already exists: " + code);
+        String tagCode = request.tagCode().trim().toUpperCase(Locale.ROOT);
+        if (toolRepository.existsByTagCode(tagCode)) {
+            throw new IllegalArgumentException("Tool tag already exists: " + tagCode);
         }
-        Tool tool = Tool.newTool(uuid, code, request.displayName().trim());
-        Tool t = toolRepository.save(tool);
+        Tool tool = Tool.newTool(cabinetId, tagCode, request.displayName().trim());
+        Tool savedTool = toolRepository.save(tool);
         auditService.logAction(
                 UserRole.ADMIN,
                 "admin",
                 "CREATE_TOOL",
                 AuditEntityType.TOOL,
-                t.getId()
+                savedTool.getId()
         );
-        return t.getId().toString();
+        return savedTool.getId().toString();
     }
 }
-

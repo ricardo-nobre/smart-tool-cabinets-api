@@ -1,22 +1,31 @@
 # Runtime Validation Evidence
 
-Date: 2026-07-11
+Date: 2026-07-11 22:55 +01:00
 
-## Maven Tests
+## Maven Tests And Verify
 
-Command:
+Commands:
 
 ```powershell
 cd backend
-mvn test
+mvn clean test
+mvn clean verify
 ```
 
-Result:
+Test result:
 
 ```text
 Tests run: 28, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
-Total time: 38.388 s
+Total time: 49.960 s
+```
+
+Verify result:
+
+```text
+Tests run: 28, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
+Total time: 47.531 s
 ```
 
 ## Docker Compose Configuration
@@ -51,8 +60,7 @@ services:
 Commands:
 
 ```powershell
-docker compose down -v
-docker compose up -d
+scripts\dev\reset-db.cmd
 docker compose ps
 ```
 
@@ -178,4 +186,7 @@ Result:
 [OK] TAG-004 marked as RETURNED
 [OK] No pending assignments
 [OK] Operator can exit
+pendingAssignmentsCount: 0
+requireSupervisorReview: false
+allowExit: true
 ```

@@ -71,60 +71,54 @@ public class DeviceCabinetAccessService {
         this.toolRepository = toolRepository;
     }
 
-    /**
-     * Abre CabinetAccess para o armario e operador autenticado.
-     */
     @Transactional
     public OpenCabinetAccessResponse openCabinetAccess(OpenCabinetAccessRequest request) {
-          if (request == null) {
-              throw new IllegalArgumentException("request is required");
-          }
+        if (request == null) {
+            throw new IllegalArgumentException("request is required");
+        }
 
-          String cabinetCode = request.cabinetCode();
-          if (cabinetCode == null || cabinetCode.isBlank()) {
-              throw new IllegalArgumentException("cabinetCode is required");
-          }
+        String cabinetCode = request.cabinetCode();
+        if (cabinetCode == null || cabinetCode.isBlank()) {
+            throw new IllegalArgumentException("cabinetCode is required");
+        }
 
-          UUID operatorId = request.operatorId();
+        UUID operatorId = request.operatorId();
 
-          var cabinet = cabinetRepository.findByCode(cabinetCode.trim())
-                  .orElseThrow(() -> new IllegalArgumentException("cabinet not found for code: " + cabinetCode));
+        var cabinet = cabinetRepository.findByCode(cabinetCode.trim())
+                .orElseThrow(() -> new IllegalArgumentException("cabinet not found for code: " + cabinetCode));
 
-          if (!cabinet.isActive()) {
-              throw new IllegalStateException("cabinet is not active: " + cabinetCode);
-          }
+        if (!cabinet.isActive()) {
+            throw new IllegalStateException("cabinet is not active: " + cabinetCode);
+        }
 
-          var operator = userRepository.findById(operatorId)
-                  .orElseThrow(() -> new IllegalArgumentException("operator not found: " + operatorId));
+        var operator = userRepository.findById(operatorId)
+                .orElseThrow(() -> new IllegalArgumentException("operator not found: " + operatorId));
 
-          if (!operator.isActive()) {
-              throw new IllegalStateException("operator is not active: " + operatorId);
-          }
-          if (!UserRole.OPERATOR.equalsIgnoreCase(operator.getRole())) {
-              throw new IllegalArgumentException("operator must have role OPERATOR");
-          }
+        if (!operator.isActive()) {
+            throw new IllegalStateException("operator is not active: " + operatorId);
+        }
+        if (!UserRole.OPERATOR.equalsIgnoreCase(operator.getRole())) {
+            throw new IllegalArgumentException("operator must have role OPERATOR");
+        }
 
-          if (cabinetAccessRepository.findFirstByCabinetIdAndStatus(cabinet.getId(), CabinetAccessStatus.OPEN).isPresent()) {
-              throw new IllegalStateException("an OPEN cabinetAccess already exists for cabinet: " + cabinet.getId());
-          }
+        if (cabinetAccessRepository.findFirstByCabinetIdAndStatus(cabinet.getId(), CabinetAccessStatus.OPEN).isPresent()) {
+            throw new IllegalStateException("an OPEN cabinetAccess already exists for cabinet: " + cabinet.getId());
+        }
 
-          CabinetAccess cabinetAccess = CabinetAccess.open(cabinet.getId(), operatorId);
-          CabinetAccess saved = cabinetAccessRepository.save(cabinetAccess);
+        CabinetAccess cabinetAccess = CabinetAccess.open(cabinet.getId(), operatorId);
+        CabinetAccess saved = cabinetAccessRepository.save(cabinetAccess);
 
-          auditService.logAction(
-                  "DEVICE",
-                  cabinet.getCode(),
-                  "OPEN_CABINET_ACCESS",
-                  AuditEntityType.CABINET_ACCESS,
-                  saved.getId()
-          );
+        auditService.logAction(
+                "DEVICE",
+                cabinet.getCode(),
+                "OPEN_CABINET_ACCESS",
+                AuditEntityType.CABINET_ACCESS,
+                saved.getId()
+        );
 
-          return new OpenCabinetAccessResponse(saved.getId(), saved.getStatus(), saved.getOpenedAt());
-      }
+        return new OpenCabinetAccessResponse(saved.getId(), saved.getStatus(), saved.getOpenedAt());
+    }
 
-    /**
-     * Fecha CabinetAccess e devolve resultado operacional baseline.
-     */
     @Transactional
     public CloseCabinetAccessResponse closeCabinetAccess(String cabinetAccessId) {
         if (cabinetAccessId == null || cabinetAccessId.isBlank()) {
@@ -138,12 +132,12 @@ public class DeviceCabinetAccessService {
             throw new IllegalArgumentException("Invalid cabinetAccessId: " + cabinetAccessId);
         }
 
-        Optional<CabinetAccess> cabinetAccess = cabinetAccessRepository.findById(parsedCabinetAccessId);
-        if(cabinetAccess.isEmpty()) {
+        Optional<CabinetAccess> cabinetAccessOpt = cabinetAccessRepository.findById(parsedCabinetAccessId);
+        if (cabinetAccessOpt.isEmpty()) {
             throw new IllegalArgumentException("cabinetAccess not found");
         }
-        CabinetAccess s = cabinetAccess.get();
-        if(!CabinetAccessStatus.OPEN.equals(s.getStatus())) {
+        CabinetAccess cabinetAccess = cabinetAccessOpt.get();
+        if (!CabinetAccessStatus.OPEN.equals(cabinetAccess.getStatus())) {
             throw new IllegalStateException("CabinetAccess is not open: " + parsedCabinetAccessId);
         }
 
@@ -179,9 +173,9 @@ public class DeviceCabinetAccessService {
                 }
                 ToolAssignment assignment = ToolAssignment.createActive(
                         toolId,
-                        s.getOperatorId(),
-                        s.getCabinetId(),
-                        s.getId(),
+                        cabinetAccess.getOperatorId(),
+                        cabinetAccess.getCabinetId(),
+                        cabinetAccess.getId(),
                         OffsetDateTime.now()
                 );
                 toolAssignmentRepository.save(assignment);
@@ -196,11 +190,11 @@ public class DeviceCabinetAccessService {
                 }
 
                 ToolAssignment assignment = openAssignmentOpt.get();
-                if (assignment.getOriginCabinetId().equals(s.getCabinetId())) {
-                    assignment.markReturned(s.getCabinetId(), s.getId(), OffsetDateTime.now());
+                if (assignment.getOriginCabinetId().equals(cabinetAccess.getCabinetId())) {
+                    assignment.markReturned(cabinetAccess.getCabinetId(), cabinetAccess.getId(), OffsetDateTime.now());
                     assignmentsReturnedCount++;
                 } else {
-                    assignment.markPendingReview(s.getCabinetId(), s.getId(), OffsetDateTime.now());
+                    assignment.markPendingReview(cabinetAccess.getCabinetId(), cabinetAccess.getId(), OffsetDateTime.now());
                     discrepancyFlag = true;
                 }
                 toolAssignmentRepository.save(assignment);
@@ -209,11 +203,11 @@ public class DeviceCabinetAccessService {
             discrepancyFlag = true;
         }
 
-        var cabinet = cabinetRepository.findById(s.getCabinetId())
-                .orElseThrow(() -> new IllegalArgumentException("cabinet not found: " + s.getCabinetId()));
+        var cabinet = cabinetRepository.findById(cabinetAccess.getCabinetId())
+                .orElseThrow(() -> new IllegalArgumentException("cabinet not found: " + cabinetAccess.getCabinetId()));
 
-        s.close();
-        CabinetAccess saved = cabinetAccessRepository.save(s);
+        cabinetAccess.close();
+        CabinetAccess saved = cabinetAccessRepository.save(cabinetAccess);
         auditService.logAction(
                 "DEVICE",
                 cabinet.getCode(),

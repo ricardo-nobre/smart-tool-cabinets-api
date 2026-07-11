@@ -17,7 +17,12 @@ import smarttoolcabinets.cabinetaccess.repository.CabinetAccessRepository;
 import smarttoolcabinets.tool.domain.Tool;
 import smarttoolcabinets.tool.repository.ToolRepository;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
@@ -117,11 +122,11 @@ public class InventoryService {
                 .filter(toolIdByTag::containsKey)
                 .toList();
 
-        InventorySnapshot is = InventorySnapshot.newSnapshot(parsedCabinetAccessId, normalizedSnapshotType, request.capturedAt(), normalizedSource);
-        InventorySnapshot i = inventorySnapshotRepository.save(is);
+        InventorySnapshot snapshot = InventorySnapshot.newSnapshot(parsedCabinetAccessId, normalizedSnapshotType, request.capturedAt(), normalizedSource);
+        InventorySnapshot savedSnapshot = inventorySnapshotRepository.save(snapshot);
 
         List<InventorySnapshotItem> items = recognizedTags.stream()
-                .map(tag -> InventorySnapshotItem.newItem(i.getId(), tag, toolIdByTag.get(tag)))
+                .map(tag -> InventorySnapshotItem.newItem(savedSnapshot.getId(), tag, toolIdByTag.get(tag)))
                 .toList();
 
         inventorySnapshotItemRepository.saveAll(items);
@@ -131,12 +136,11 @@ public class InventoryService {
                 parsedCabinetAccessId.toString(),
                 "CREATE_INVENTORY_SNAPSHOT",
                 AuditEntityType.INVENTORY_SNAPSHOT,
-                i.getId()
+                savedSnapshot.getId()
         );
 
 
-        return new CreateSnapshotResponse(i.getId(), recognizedTags);
+        return new CreateSnapshotResponse(savedSnapshot.getId(), recognizedTags);
     }
 }
-
 
