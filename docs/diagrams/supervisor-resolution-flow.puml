@@ -10,13 +10,13 @@ start
 :Investigar o porquê das pendências/discrepâncias;
 :Selecionar reasonCode;
 :Escrever reportText;
-:Definir allowExit;
 
 |Sistema|
 :Persistir SupervisorResolution;
 :Associar ToolAssignments abrangidos;
+:Marcar ToolAssignments abrangidos como RESOLVED;
 :Registar AuditLog da decisão;
-:Encaminhar tratamento material posterior para a empresa;
+:Recalcular allowExit no end-of-day-check;
 
 stop
 @enduml

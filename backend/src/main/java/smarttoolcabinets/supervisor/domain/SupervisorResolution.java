@@ -8,9 +8,6 @@ import jakarta.persistence.Table;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-/**
- * Estrutura base da decisao formal de supervisor para pendencias.
- */
 @Entity
 @Table(name = "supervisor_resolution")
 public class SupervisorResolution {
@@ -33,9 +30,6 @@ public class SupervisorResolution {
     @Column(name = "decision_at", nullable = false)
     private OffsetDateTime decisionAt;
 
-    @Column(name = "allow_exit", nullable = false)
-    private boolean allowExit;
-
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -48,8 +42,7 @@ public class SupervisorResolution {
             UUID supervisorId,
             String reasonCode,
             String reportText,
-            OffsetDateTime decisionAt,
-            boolean allowExit
+            OffsetDateTime decisionAt
     ) {
         SupervisorResolution resolution = new SupervisorResolution();
         resolution.id = UUID.randomUUID();
@@ -58,7 +51,6 @@ public class SupervisorResolution {
         resolution.reasonCode = reasonCode;
         resolution.reportText = reportText;
         resolution.decisionAt = decisionAt;
-        resolution.allowExit = allowExit;
         resolution.createdAt = OffsetDateTime.now();
         return resolution;
     }
@@ -86,9 +78,4 @@ public class SupervisorResolution {
     public OffsetDateTime getDecisionAt() {
         return decisionAt;
     }
-
-    public boolean isAllowExit() {
-        return allowExit;
-    }
 }
-

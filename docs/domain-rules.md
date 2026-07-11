@@ -48,9 +48,10 @@ Campos obrigatórios:
 - `reasonCode`
 - `reportText`
 - `decisionAt`
-- `allowExit`
 - `assignmentIds`
 
 Notas obrigatórias:
-- Autorizar saída não apaga a pendência factual da ferramenta.
+- A resolução altera apenas as assignments abrangidas para `RESOLVED`.
+- `allowExit` pertence exclusivamente ao `end-of-day-check`.
+- `allowExit` fica `true` apenas quando não restam assignments em `ACTIVE` ou `PENDING_REVIEW`.
 - Cada resolução deve gerar registo em `AuditLog`.

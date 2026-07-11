@@ -25,12 +25,13 @@ else (sim)
   :Investigar pendências;
   :Classificar causa humana (não inferida pelo sistema);
   :Registar reasonCode + reportText;
-  :Definir allowExit;
   |Sistema|
+  :Marcar ToolAssignments abrangidos como RESOLVED;
   :Registar AuditLog da decisão;
-  if (allowExit=true?) then (sim)
+  :Executar end-of-day-check novamente;
+  if (Restam pendências?) then (não)
     :Autorizar saída operacional;
-  else (não)
+  else (sim)
     :Manter pendência operacional;
   endif
   stop

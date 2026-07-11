@@ -14,8 +14,6 @@ public record CreateSupervisorResolutionRequest(
         @NotBlank String reasonCode,
         @NotBlank String reportText,
         @NotNull OffsetDateTime decisionAt,
-        @NotNull Boolean allowExit,
         @NotEmpty List<@NotNull UUID> assignmentIds
 ) {
 }
-

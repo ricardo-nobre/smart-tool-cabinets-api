@@ -25,9 +25,10 @@ Este ficheiro descreve apenas o comportamento necessário para provar a API no r
 
 ## End-of-day check
 1. API avalia estado final da custódia em `GET /api/operators/{operatorId}/end-of-day-check`.
-2. Se houver pendências, `requireSupervisorReview = true`.
+2. Se houver assignments em `ACTIVE` ou `PENDING_REVIEW`, `requireSupervisorReview = true` e `allowExit = false`.
 3. Supervisor regista resolução formal em `POST /api/supervisor/resolutions`.
-4. A decisão define `allowExit`, sem apagar a pendência factual.
+4. A resolução marca apenas as assignments abrangidas como `RESOLVED`.
+5. O `end-of-day-check` é executado novamente e recalcula `allowExit`.
 
 ## Regras de interpretação operacional
 - Devolução parcial durante o dia é comportamento normal.
@@ -45,5 +46,5 @@ Este ficheiro descreve apenas o comportamento necessário para provar a API no r
 - UC-06 Consultar atribuições do operador.
 - UC-07 Validar fim do dia.
 - UC-08 Supervisor registar `reasonCode` + `reportText`.
-- UC-09 Supervisor decidir `allowExit`.
+- UC-09 Sistema recalcular `allowExit` no `end-of-day-check`.
 - UC-10 Auditar operações relevantes.

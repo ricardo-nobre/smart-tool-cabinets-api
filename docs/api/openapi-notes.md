@@ -7,6 +7,7 @@ Estas notas alinham a leitura de `docs/api/openapi.yaml` com o foco do relatóri
 - Fecho físico sempre permitido, com `operationalResult`.
 - Pendências avaliadas no `end-of-day-check`.
 - Resolução formal por supervisor com `reasonCode` e `reportText`.
+- `allowExit` é resultado calculado pelo `end-of-day-check`, não campo enviado ou guardado na resolução de supervisor.
 
 ## Simplificações assumidas nesta fase
 - Não tratar regras ricas de devolução por armário como eixo central da API.

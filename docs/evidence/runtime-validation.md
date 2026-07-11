@@ -1,6 +1,6 @@
 # Runtime Validation Evidence
 
-Date: 2026-07-10
+Date: 2026-07-11
 
 ## Maven Tests
 
@@ -14,9 +14,9 @@ mvn test
 Result:
 
 ```text
-Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 17, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
-Total time: 39.266 s
+Total time: 31.356 s
 ```
 
 ## Docker Compose
@@ -42,12 +42,13 @@ Relevant startup output:
 
 ```text
 Schema history table "public"."flyway_schema_history" does not exist yet
-Successfully validated 2 migrations
+Successfully validated 3 migrations
 Creating Schema History table "public"."flyway_schema_history" ...
 Current version of schema "public": << Empty Schema >>
 Migrating schema "public" to version "1 - init schema"
 Migrating schema "public" to version "2 - seed demo data"
-Successfully applied 2 migrations to schema "public", now at version v2
+Migrating schema "public" to version "3 - remove allow exit from supervisor resolution"
+Successfully applied 3 migrations to schema "public", now at version v3
 Tomcat started on port 8080 (http) with context path '/'
 Started SmartToolCabinetsApplication
 ```
@@ -61,11 +62,33 @@ docker exec stc-postgres psql -U postgres -d smart_tool_cabinets -c "select vers
 Result:
 
 ```text
- version |  description   | success
----------+----------------+---------
- 1       | init schema    | t
- 2       | seed demo data | t
-(2 rows)
+ version |                 description                  | success
+---------+----------------------------------------------+---------
+ 1       | init schema                                  | t
+ 2       | seed demo data                               | t
+ 3       | remove allow exit from supervisor resolution | t
+(3 rows)
+```
+
+Supervisor resolution schema confirmation:
+
+```powershell
+docker exec stc-postgres psql -U postgres -d smart_tool_cabinets -c "select column_name from information_schema.columns where table_name = 'supervisor_resolution' order by ordinal_position;"
+```
+
+Result:
+
+```text
+  column_name
+---------------
+ id
+ operator_id
+ supervisor_id
+ reason_code
+ report_text
+ decision_at
+ created_at
+(7 rows)
 ```
 
 ## Swagger / OpenAPI
@@ -82,4 +105,11 @@ Results:
 ```text
 /swagger-ui.html -> HTTP 200
 /v3/api-docs     -> HTTP 200
+```
+
+Generated contract confirmation:
+
+```text
+CreateSupervisorResolutionRequest  -> operatorId, supervisorId, reasonCode, reportText, decisionAt, assignmentIds
+CreateSupervisorResolutionResponse -> resolutionId, operatorId, supervisorId, decisionAt, reasonCode, reportText, resolvedAssignmentIds
 ```

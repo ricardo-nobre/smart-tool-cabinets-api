@@ -547,17 +547,16 @@ components:
 
     CreateSupervisorResolutionRequest:
       type: object
-      required: [operatorId, supervisorId, reasonCode, reportText, allowExit, assignmentIds, decisionAt]
+      required: [operatorId, supervisorId, reasonCode, reportText, assignmentIds, decisionAt]
       description: |
         Decisão humana formal do supervisor.
-        O sistema não infere causa automaticamente.
+        O supervisor resolve assignments pendentes; allowExit é recalculado pelo end-of-day-check.
       properties:
         operatorId: { type: string, format: uuid }
         supervisorId: { type: string, format: uuid }
         reasonCode: { type: string }
         reportText: { type: string }
         decisionAt: { type: string, format: date-time }
-        allowExit: { type: boolean }
         assignmentIds:
           type: array
           minItems: 1
@@ -568,12 +567,11 @@ components:
         reasonCode: TOOL_NOT_RETURNED
         reportText: Ferramenta não devolvida no final do turno; ocorrência registada para tratamento interno.
         decisionAt: 2026-06-25T18:10:00Z
-        allowExit: true
         assignmentIds: [00000000-0000-0000-0000-000000000902]
 
     CreateSupervisorResolutionResponse:
       type: object
-      required: [resolutionId, operatorId, supervisorId, decisionAt, reasonCode, reportText, allowExit, resolvedAssignmentIds]
+      required: [resolutionId, operatorId, supervisorId, decisionAt, reasonCode, reportText, resolvedAssignmentIds]
       properties:
         resolutionId: { type: string, format: uuid }
         operatorId: { type: string, format: uuid }
@@ -581,7 +579,6 @@ components:
         decisionAt: { type: string, format: date-time }
         reasonCode: { type: string }
         reportText: { type: string }
-        allowExit: { type: boolean }
         resolvedAssignmentIds:
           type: array
           items: { type: string, format: uuid }
@@ -593,6 +590,5 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreateSupervisorResolutionResponse'
-
 
 

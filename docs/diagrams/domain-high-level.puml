@@ -81,7 +81,6 @@ entity supervisor_resolution {
   reason_code : varchar
   report_text : text
   decision_at : timestamptz
-  allow_exit : boolean
 }
 
 entity supervisor_resolution_assignment {

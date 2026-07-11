@@ -11,8 +11,6 @@ public record CreateSupervisorResolutionResponse(
         OffsetDateTime decisionAt,
         String reasonCode,
         String reportText,
-        boolean allowExit,
         List<UUID> resolvedAssignmentIds
 ) {
 }
-

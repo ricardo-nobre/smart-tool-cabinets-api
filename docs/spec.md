@@ -41,7 +41,7 @@ Estados mínimos: `ACTIVE`, `RETURNED`, `PENDING_REVIEW`, `RESOLVED`.
 mas o foco funcional do intermédio é o estado de custódia por operador (devolvida ou não devolvida, com pendência quando aplicável).
 
 ### `supervisor_resolution`
-`id`, `operator_id`, `supervisor_id`, `reason_code`, `report_text`, `decision_at`, `allow_exit`, `created_at`
+`id`, `operator_id`, `supervisor_id`, `reason_code`, `report_text`, `decision_at`, `created_at`
 
 ### `supervisor_resolution_assignment`
 `supervisor_resolution_id`, `tool_assignment_id`, `created_at`
@@ -82,6 +82,7 @@ mas o foco funcional do intermédio é o estado de custódia por operador (devol
 2. A custódia é avaliada pelo estado atual de `tool_assignment` (`ACTIVE`, `RETURNED`, `PENDING_REVIEW`, `RESOLVED`).
 3. O sistema deteta factos operacionais; não diagnostica a causa.
 4. `reasonCode` e `reportText` são decisão humana do supervisor.
+5. `allowExit` é calculado apenas pelo `end-of-day-check`: fica `true` quando não existem assignments em `ACTIVE` ou `PENDING_REVIEW`.
 
 ## 6) Evidências esperadas no relatório intermédio
 - Coleção curta de requests/responses reais dos endpoints nucleares.

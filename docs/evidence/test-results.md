@@ -1,6 +1,6 @@
 # Test Results Evidence
 
-Date: 2026-07-10
+Date: 2026-07-11
 
 Command:
 
@@ -12,7 +12,7 @@ mvn test
 Result:
 
 ```text
-Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 17, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
 ```
 
@@ -23,7 +23,12 @@ Covered rules:
 - close marks a ToolAssignment as RETURNED when a tool reappears;
 - close accepts an empty AFTER snapshot when the cabinet becomes empty;
 - end-of-day-check reports ACTIVE assignments as pending;
-- SupervisorResolution marks an active assignment as RESOLVED;
+- SupervisorResolution marks ACTIVE and PENDING_REVIEW assignments as RESOLVED;
+- SupervisorResolution rejects RETURNED and already RESOLVED assignments;
+- SupervisorResolution rejects assignments from another operator;
+- SupervisorResolution rejects duplicated assignment IDs;
+- SupervisorResolution request/response no longer expose allowExit;
+- partial supervisor resolution keeps end-of-day blocked while another assignment remains pending;
 - AFTER snapshot without previous BEFORE fails;
 - duplicate BEFORE snapshot fails;
 - duplicate AFTER snapshot fails;

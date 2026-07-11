@@ -13,12 +13,15 @@ import smarttoolcabinets.supervisor.dto.SupervisorResolutionListResponse;
 import smarttoolcabinets.supervisor.repository.SupervisorResolutionAssignmentRepository;
 import smarttoolcabinets.supervisor.repository.SupervisorResolutionRepository;
 import smarttoolcabinets.toolassignment.domain.ToolAssignment;
+import smarttoolcabinets.toolassignment.domain.ToolAssignmentStatus;
 import smarttoolcabinets.toolassignment.repository.ToolAssignmentRepository;
 import smarttoolcabinets.user.domain.UserRole;
 import smarttoolcabinets.user.repository.UserRepository;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -51,11 +54,40 @@ public class SupervisorResolutionService {
         if (!UserRole.OPERATOR.equalsIgnoreCase(operator.getRole())) {
             throw new IllegalArgumentException("operatorId must reference role OPERATOR");
         }
+        if (!operator.isActive()) {
+            throw new IllegalArgumentException("operator must be active");
+        }
 
         var supervisor = userRepository.findById(request.supervisorId())
                 .orElseThrow(() -> new IllegalArgumentException("supervisor not found: " + request.supervisorId()));
         if (!UserRole.SUPERVISOR.equalsIgnoreCase(supervisor.getRole())) {
             throw new IllegalArgumentException("supervisorId must reference role SUPERVISOR");
+        }
+        if (!supervisor.isActive()) {
+            throw new IllegalArgumentException("supervisor must be active");
+        }
+
+        List<UUID> assignmentIds = request.assignmentIds();
+        if (assignmentIds == null || assignmentIds.isEmpty()) {
+            throw new IllegalArgumentException("assignmentIds must not be empty");
+        }
+        Set<UUID> uniqueAssignmentIds = new HashSet<>(assignmentIds);
+        if (uniqueAssignmentIds.size() != assignmentIds.size()) {
+            throw new IllegalArgumentException("assignmentIds must not contain duplicates");
+        }
+
+        List<ToolAssignment> assignments = toolAssignmentRepository.findAllById(assignmentIds);
+        if (assignments.size() != assignmentIds.size()) {
+            throw new IllegalArgumentException("One or more assignmentIds were not found");
+        }
+
+        for (ToolAssignment assignment : assignments) {
+            if (!assignment.getOperatorId().equals(request.operatorId())) {
+                throw new IllegalArgumentException("assignment does not belong to operator: " + assignment.getId());
+            }
+            if (!isResolvable(assignment)) {
+                throw new IllegalArgumentException("assignment is not in a resolvable state: " + assignment.getId());
+            }
         }
 
         SupervisorResolution resolution = SupervisorResolution.create(
@@ -63,22 +95,13 @@ public class SupervisorResolutionService {
                 request.supervisorId(),
                 request.reasonCode().trim(),
                 request.reportText().trim(),
-                request.decisionAt(),
-                request.allowExit()
+                request.decisionAt()
         );
 
         SupervisorResolution saved = supervisorResolutionRepository.save(resolution);
 
-        List<ToolAssignment> assignments = toolAssignmentRepository.findAllById(request.assignmentIds());
-        if (assignments.size() != request.assignmentIds().size()) {
-            throw new IllegalArgumentException("One or more assignmentIds were not found");
-        }
-
         List<SupervisorResolutionAssignment> links = new ArrayList<>();
         for (ToolAssignment assignment : assignments) {
-            if (!assignment.getOperatorId().equals(request.operatorId())) {
-                throw new IllegalArgumentException("assignment does not belong to operator: " + assignment.getId());
-            }
             assignment.markResolved();
             links.add(SupervisorResolutionAssignment.create(
                     new SupervisorResolutionAssignmentId(saved.getId(), assignment.getId())
@@ -96,7 +119,7 @@ public class SupervisorResolutionService {
                 saved.getId()
         );
 
-        return toResponse(saved, request.assignmentIds());
+        return toResponse(saved, assignmentIds);
     }
 
     public SupervisorResolutionListResponse list(UUID operatorId) {
@@ -126,9 +149,12 @@ public class SupervisorResolutionService {
                 resolution.getDecisionAt(),
                 resolution.getReasonCode(),
                 resolution.getReportText(),
-                resolution.isAllowExit(),
                 assignmentIds
         );
     }
-}
 
+    private boolean isResolvable(ToolAssignment assignment) {
+        return ToolAssignmentStatus.ACTIVE.equalsIgnoreCase(assignment.getStatus())
+                || ToolAssignmentStatus.PENDING_REVIEW.equalsIgnoreCase(assignment.getStatus());
+    }
+}

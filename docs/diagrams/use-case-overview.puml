@@ -13,9 +13,10 @@
 *** Investigar situação
 *** Registar reasonCode
 *** Escrever reportText
-*** Decidir allowExit
+*** Resolver assignments pendentes
 ** Sistema
 *** Detetar pendências e discrepâncias
 *** Atualizar ToolAssignment
+*** Calcular allowExit no end-of-day-check
 *** Registar AuditLog
 @endmindmap
