@@ -9,14 +9,17 @@ import smarttoolcabinets.cabinet.repository.CabinetRepository;
 import smarttoolcabinets.tool.domain.Tool;
 import smarttoolcabinets.tool.repository.ToolRepository;
 import smarttoolcabinets.toolassignment.domain.ToolAssignment;
+import smarttoolcabinets.toolassignment.domain.ToolAssignmentStatus;
 import smarttoolcabinets.toolassignment.repository.ToolAssignmentRepository;
 import smarttoolcabinets.user.domain.User;
+import smarttoolcabinets.user.domain.UserRole;
 import smarttoolcabinets.user.repository.UserRepository;
 
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -36,6 +39,19 @@ class OperatorQueryServiceTest {
 
     @Autowired
     private ToolAssignmentRepository toolAssignmentRepository;
+
+    @Test
+    void endOfDayCheckAllowsExitWhenOperatorHasNoPendingAssignments() {
+        String suffix = UUID.randomUUID().toString().replace("-", "").toUpperCase();
+        User operator = userRepository.save(User.newUser("operator-clean-" + suffix, "Operator Clean", UserRole.OPERATOR, User.hashPin("4321"), null));
+
+        var response = operatorQueryService.endOfDayCheck(operator.getId());
+
+        assertThat(response.pendingAssignmentsCount()).isZero();
+        assertThat(response.requireSupervisorReview()).isFalse();
+        assertThat(response.allowExit()).isTrue();
+        assertThat(response.pendingAssignments()).isEmpty();
+    }
 
     @Test
     void endOfDayCheckReturnsActiveAssignmentAsPending() {
@@ -63,5 +79,50 @@ class OperatorQueryServiceTest {
                     assertThat(item.status()).isEqualTo("ACTIVE");
                     assertThat(item.tagCode()).isEqualTo(tool.getTagCode());
                 });
+    }
+
+    @Test
+    void endOfDayCheckReturnsPendingReviewAssignmentAsPending() {
+        String suffix = UUID.randomUUID().toString().replace("-", "").toUpperCase();
+        Cabinet cabinet = cabinetRepository.save(Cabinet.newCabinet("CAB-EOD-PENDING-" + suffix, "Cabinet EOD", "Lab"));
+        User operator = userRepository.save(User.newUser("operator-eod-pending-" + suffix, "Operator EOD", UserRole.OPERATOR, User.hashPin("4321"), null));
+        Tool tool = toolRepository.save(Tool.newTool(cabinet.getId(), "TAG-EOD-PENDING-" + suffix, "Tool EOD"));
+        ToolAssignment assignment = ToolAssignment.createActive(
+                tool.getId(),
+                operator.getId(),
+                cabinet.getId(),
+                UUID.randomUUID(),
+                OffsetDateTime.now()
+        );
+        assignment.markPendingReview(cabinet.getId(), UUID.randomUUID(), OffsetDateTime.now());
+        toolAssignmentRepository.save(assignment);
+
+        var response = operatorQueryService.endOfDayCheck(operator.getId());
+
+        assertThat(response.pendingAssignmentsCount()).isEqualTo(1);
+        assertThat(response.requireSupervisorReview()).isTrue();
+        assertThat(response.allowExit()).isFalse();
+        assertThat(response.pendingAssignments())
+                .singleElement()
+                .satisfies(item -> assertThat(item.status()).isEqualTo(ToolAssignmentStatus.PENDING_REVIEW));
+    }
+
+    @Test
+    void endOfDayCheckRejectsUnknownOperator() {
+        UUID missingOperatorId = UUID.randomUUID();
+
+        assertThatThrownBy(() -> operatorQueryService.endOfDayCheck(missingOperatorId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("operator not found");
+    }
+
+    @Test
+    void getAssignmentsRejectsInvalidStatus() {
+        String suffix = UUID.randomUUID().toString().replace("-", "").toUpperCase();
+        User operator = userRepository.save(User.newUser("operator-status-" + suffix, "Operator Status", UserRole.OPERATOR, User.hashPin("4321"), null));
+
+        assertThatThrownBy(() -> operatorQueryService.getAssignments(operator.getId(), "WRONG"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("status is invalid");
     }
 }

@@ -77,6 +77,10 @@ public class User {
         return nfcUid;
     }
 
+    public void deactivate() {
+        this.active = false;
+    }
+
     public static String hashPin(String pin) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");

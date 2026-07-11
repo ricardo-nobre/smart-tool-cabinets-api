@@ -1,11 +1,9 @@
 package smarttoolcabinets.supervisor.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
 
 public record CreateSupervisorResolutionRequest(
@@ -14,6 +12,6 @@ public record CreateSupervisorResolutionRequest(
         @NotBlank String reasonCode,
         @NotBlank String reportText,
         @NotNull OffsetDateTime decisionAt,
-        @NotEmpty List<@NotNull UUID> assignmentIds
+        @NotNull UUID assignmentId
 ) {
 }

@@ -1,2 +1,2 @@
 ALTER TABLE supervisor_resolution
-    DROP COLUMN IF EXISTS allow_exit;
+    DROP COLUMN allow_exit;

@@ -1,57 +1,57 @@
-# Domínio e regras (API-first)
+# Domínio e Regras
 
-Este documento fixa o mínimo de domínio e regras que a API tem de respeitar no relatório intermédio.
-O objetivo não é modelar toda a operação da empresa, mas sim garantir coerência entre contrato, fluxo e dados.
+Este documento resume as regras finais do MVP da API de smart tool cabinets.
 
-## 1) Centro do sistema
+## Conceitos
 
-- `ToolAssignment`: estado de custódia de cada ferramenta por operador.
-- `CabinetAccess`: interação local entre dispositivo e armário.
-- `SupervisorResolution`: decisão humana formal quando existem pendências.
-- `AuditLog`: rastreabilidade transversal das ações relevantes.
+- `CabinetAccess`: interação curta entre operador e armário.
+- `InventorySnapshot`: leitura RFID `BEFORE` ou `AFTER` associada a um `CabinetAccess`.
+- `ToolAssignment`: custódia de uma ferramenta por um operador.
+- `SupervisorResolution`: decisão humana formal sobre uma única pendência.
 
-## 2) Âmbito do intermédio
+## Custódia
 
-### Entra no âmbito principal
-- Definição e validação da API principal de custódia.
-- Fluxo fim-a-fim: autenticação -> acesso -> snapshots -> close -> end-of-day-check -> resolução de supervisor.
-- Modelo de dados essencial para suportar esse fluxo.
-- Evidência de comportamento real do backend face ao contrato.
+1. Uma ferramenta presente no snapshot `BEFORE` e ausente no `AFTER` cria uma `ToolAssignment` em estado `ACTIVE`.
+2. Uma ferramenta só pode ter uma assignment aberta de cada vez.
+3. São assignments abertas: `ACTIVE` e `PENDING_REVIEW`.
+4. Uma ferramenta inativa (`tool.active=false`) não deve originar nova assignment operacional.
+5. Uma ferramenta devolvida ao armário de origem passa para `RETURNED`.
+6. Uma ferramenta detetada noutro armário passa para `PENDING_REVIEW` e guarda o contexto da deteção.
 
-### Fica fora do âmbito principal
-- Modelação exaustiva de processos internos da empresa.
-- Funcionalidades analíticas avançadas (ex.: estatística histórica detalhada).
-- Variações operacionais de hardware (ex.: múltiplas gavetas e desbloqueio parcial).
+## End-Of-Day Check
 
-### Pode entrar como evolução futura
-- Observabilidade avançada de uso de ferramentas.
-- Hardening de segurança e autenticação avançada.
-- Extensão do dispositivo para topologias de armário mais complexas.
+O endpoint `GET /api/operators/{operatorId}/end-of-day-check` recalcula sempre:
 
-## 3) Regras normativas
+- `pendingAssignmentsCount`: número de assignments `ACTIVE` ou `PENDING_REVIEW`;
+- `requireSupervisorReview`: `true` se existir pelo menos uma pendência;
+- `allowExit`: `true` apenas se não existir nenhuma pendência.
 
-1. O armário fecha sempre fisicamente.
-2. O endpoint de close devolve `operationalResult`; não devolve erro terminal por falta de ferramenta.
-3. O delta `BEFORE`/`AFTER` cria ou encerra movimentos de custódia.
-4. Uma ferramenta só pode ter uma atribuição ativa de cada vez.
-5. `ACTIVE` e `PENDING_REVIEW` contam como pendência no fim do dia.
-6. `RETURNED` e `RESOLVED` não contam como pendência no fim do dia.
-7. Dados de origem de atribuição podem ser guardados para rastreabilidade, sem serem a regra central da API intermédia.
-8. O sistema deteta factos operacionais; não infere causa real.
-9. A classificação causal é humana e pertence ao supervisor.
+Não existe scheduler fixo às 18h. O check é chamado quando o operador tenta terminar o dia ou quando um sistema externo pretende validar a saída.
 
-## 4) SupervisorResolution (obrigatório)
+## SupervisorResolution
 
-Campos obrigatórios:
-- `operatorId`
-- `supervisorId`
-- `reasonCode`
-- `reportText`
-- `decisionAt`
-- `assignmentIds`
+1. O supervisor só intervém quando o `end-of-day-check` indica pendências.
+2. Cada `SupervisorResolution` trata exatamente uma `ToolAssignment`.
+3. A resolução pode tratar assignments `ACTIVE` ou `PENDING_REVIEW`.
+4. Assignments `RETURNED` ou `RESOLVED` não podem ser resolvidas novamente.
+5. `RESOLVED` significa encerramento formal da ocorrência, não devolução física.
+6. `allowExit` não é enviado, escolhido ou persistido pelo supervisor.
 
-Notas obrigatórias:
-- A resolução altera apenas as assignments abrangidas para `RESOLVED`.
-- `allowExit` pertence exclusivamente ao `end-of-day-check`.
-- `allowExit` fica `true` apenas quando não restam assignments em `ACTIVE` ou `PENDING_REVIEW`.
-- Cada resolução deve gerar registo em `AuditLog`.
+Reason codes admitidos:
+
+- `TOOL_LOST`
+- `TOOL_DAMAGED`
+- `RFID_FAILURE`
+- `MANUAL_VERIFICATION`
+- `OTHER`
+
+Efeito em `tool.active`:
+
+- `TOOL_LOST`, `TOOL_DAMAGED` e `RFID_FAILURE` desativam a ferramenta;
+- `MANUAL_VERIFICATION` e `OTHER` preservam o estado atual da ferramenta.
+
+## Migrações
+
+A V3 remove `allow_exit` de `supervisor_resolution`. Esta alteração direta à V3 é aceitável neste projeto porque ainda não existe produção e as bases locais de demonstração são descartáveis. Em sistemas de produção, uma migração já aplicada não deve ser alterada retroativamente.
+
+A V4 reforça a relação uma resolução para uma assignment e ajusta o índice parcial para impedir assignments abertas duplicadas por ferramenta.

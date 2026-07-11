@@ -14,24 +14,54 @@ mvn test
 Result:
 
 ```text
-Tests run: 17, Failures: 0, Errors: 0, Skipped: 0
+Tests run: 27, Failures: 0, Errors: 0, Skipped: 0
 BUILD SUCCESS
-Total time: 31.356 s
+Total time: 27.142 s
 ```
 
-## Docker Compose
+## Docker Compose Configuration
 
 Command:
 
 ```powershell
+docker compose config
+```
+
+Result:
+
+```text
+name: projeto
+services:
+  postgres:
+    container_name: stc-postgres
+    image: postgres:16
+    ports:
+      - mode: ingress
+        target: 5432
+        published: "5432"
+        protocol: tcp
+    volumes:
+      - type: volume
+        source: stc_pgdata
+        target: /var/lib/postgresql/data
+```
+
+## PostgreSQL Reset And Startup
+
+Commands:
+
+```powershell
+docker compose down -v
+docker compose up -d
 docker compose ps
 ```
 
 Result:
 
 ```text
-NAME           IMAGE         COMMAND                  SERVICE    STATUS                    PORTS
-stc-postgres   postgres:16   "docker-entrypoint.s..." postgres   Up ... (healthy)          0.0.0.0:5432->5432/tcp
+Volume projeto_stc_pgdata Removed
+NAME           IMAGE         SERVICE    STATUS                    PORTS
+stc-postgres   postgres:16   postgres   Up ... (healthy)          0.0.0.0:5432->5432/tcp
 ```
 
 ## Flyway
@@ -42,13 +72,14 @@ Relevant startup output:
 
 ```text
 Schema history table "public"."flyway_schema_history" does not exist yet
-Successfully validated 3 migrations
+Successfully validated 4 migrations
 Creating Schema History table "public"."flyway_schema_history" ...
 Current version of schema "public": << Empty Schema >>
 Migrating schema "public" to version "1 - init schema"
 Migrating schema "public" to version "2 - seed demo data"
 Migrating schema "public" to version "3 - remove allow exit from supervisor resolution"
-Successfully applied 3 migrations to schema "public", now at version v3
+Migrating schema "public" to version "4 - enforce one resolution per assignment"
+Successfully applied 4 migrations to schema "public", now at version v4
 Tomcat started on port 8080 (http) with context path '/'
 Started SmartToolCabinetsApplication
 ```
@@ -67,16 +98,11 @@ Result:
  1       | init schema                                  | t
  2       | seed demo data                               | t
  3       | remove allow exit from supervisor resolution | t
-(3 rows)
+ 4       | enforce one resolution per assignment        | t
+(4 rows)
 ```
 
 Supervisor resolution schema confirmation:
-
-```powershell
-docker exec stc-postgres psql -U postgres -d smart_tool_cabinets -c "select column_name from information_schema.columns where table_name = 'supervisor_resolution' order by ordinal_position;"
-```
-
-Result:
 
 ```text
   column_name
@@ -91,6 +117,25 @@ Result:
 (7 rows)
 ```
 
+Supervisor resolution assignment constraints:
+
+```text
+                   constraint_name                   | constraint_type
+-----------------------------------------------------+-----------------
+ fk_resolution_assignment_assignment                 | FOREIGN KEY
+ fk_resolution_assignment_resolution                 | FOREIGN KEY
+ supervisor_resolution_assignment_pkey               | PRIMARY KEY
+ uq_supervisor_resolution_assignment_resolution      | UNIQUE
+ uq_supervisor_resolution_assignment_tool_assignment | UNIQUE
+```
+
+Open assignment index:
+
+```text
+uq_tool_assignment_open_per_tool
+WHERE status IN ('ACTIVE', 'PENDING_REVIEW')
+```
+
 ## Swagger / OpenAPI
 
 Commands:
@@ -103,13 +148,34 @@ Invoke-WebRequest http://localhost:8080/v3/api-docs -UseBasicParsing
 Results:
 
 ```text
-/swagger-ui.html -> HTTP 200
-/v3/api-docs     -> HTTP 200
+/swagger-ui.html -> HTTP 200, length 734
+/v3/api-docs     -> HTTP 200, length 9642
 ```
 
 Generated contract confirmation:
 
 ```text
-CreateSupervisorResolutionRequest  -> operatorId, supervisorId, reasonCode, reportText, decisionAt, assignmentIds
-CreateSupervisorResolutionResponse -> resolutionId, operatorId, supervisorId, decisionAt, reasonCode, reportText, resolvedAssignmentIds
+CreateSupervisorResolutionRequest  -> operatorId, supervisorId, reasonCode, reportText, decisionAt, assignmentId
+CreateSupervisorResolutionResponse -> resolutionId, operatorId, supervisorId, decisionAt, reasonCode, reportText, resolvedAssignmentId
+```
+
+## Working-Day Simulator
+
+Command:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\dev\simulator.ps1
+```
+
+Result:
+
+```text
+[OK] TAG-002 assigned to operator as ACTIVE
+[OK] End-of-day check detects 1 pending assignment before exchange
+[OK] TAG-002 marked as RETURNED
+[OK] TAG-004 assigned to operator as ACTIVE
+[OK] End-of-day check now detects TAG-004 as the pending assignment
+[OK] TAG-004 marked as RETURNED
+[OK] No pending assignments
+[OK] Operator can exit
 ```

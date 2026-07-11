@@ -40,11 +40,17 @@ public class OperatorQueryService {
     }
 
     public OperatorToolAssignmentsResponse getAssignments(UUID operatorId, String status) {
+        validateOperator(operatorId);
+
         List<ToolAssignment> assignments;
         if (status == null || status.isBlank()) {
             assignments = toolAssignmentRepository.findByOperatorId(operatorId);
         } else {
-            assignments = toolAssignmentRepository.findByOperatorIdAndStatus(operatorId, status.trim().toUpperCase(Locale.ROOT));
+            String normalizedStatus = status.trim().toUpperCase(Locale.ROOT);
+            if (!ToolAssignmentStatus.SUPPORTED.contains(normalizedStatus)) {
+                throw new IllegalArgumentException("status is invalid: " + status);
+            }
+            assignments = toolAssignmentRepository.findByOperatorIdAndStatus(operatorId, normalizedStatus);
         }
 
         return new OperatorToolAssignmentsResponse(
@@ -54,14 +60,7 @@ public class OperatorQueryService {
     }
 
     public EndOfDayCheckResponse endOfDayCheck(UUID operatorId) {
-        var operator = userRepository.findById(operatorId)
-                .orElseThrow(() -> new IllegalArgumentException("operator not found: " + operatorId));
-        if (!UserRole.OPERATOR.equalsIgnoreCase(operator.getRole())) {
-            throw new IllegalArgumentException("operatorId must reference role OPERATOR");
-        }
-        if (!operator.isActive()) {
-            throw new IllegalArgumentException("operator must be active");
-        }
+        validateOperator(operatorId);
 
         List<ToolAssignment> pendingAssignments = toolAssignmentRepository.findByOperatorId(operatorId).stream()
                 .filter(assignment -> ToolAssignmentStatus.ACTIVE.equalsIgnoreCase(assignment.getStatus())
@@ -80,6 +79,20 @@ public class OperatorQueryService {
                 requireSupervisorReview,
                 allowExit
         );
+    }
+
+    private void validateOperator(UUID operatorId) {
+        if (operatorId == null) {
+            throw new IllegalArgumentException("operatorId is required");
+        }
+        var operator = userRepository.findById(operatorId)
+                .orElseThrow(() -> new IllegalArgumentException("operator not found: " + operatorId));
+        if (!UserRole.OPERATOR.equalsIgnoreCase(operator.getRole())) {
+            throw new IllegalArgumentException("operatorId must reference role OPERATOR");
+        }
+        if (!operator.isActive()) {
+            throw new IllegalArgumentException("operator must be active");
+        }
     }
 
     private ToolAssignmentItem toItem(ToolAssignment assignment) {

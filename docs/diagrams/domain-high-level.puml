@@ -114,8 +114,8 @@ cabinet_access |o--o{ tool_assignment : return_access
 
 app_user ||--o{ supervisor_resolution : operator
 app_user ||--o{ supervisor_resolution : supervisor
-supervisor_resolution ||--o{ supervisor_resolution_assignment : resolves
-tool_assignment ||--o{ supervisor_resolution_assignment : covered_by
+supervisor_resolution ||--|| supervisor_resolution_assignment : resolves
+tool_assignment ||--o| supervisor_resolution_assignment : covered_by
 
 note right of audit_log
   Transversal audit entity.

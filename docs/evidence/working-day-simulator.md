@@ -23,20 +23,20 @@ Scenario: working day checkout, exchange and final return
 [2] Opening first CabinetAccess for checkout
 [3] BEFORE snapshot: TAG-001, TAG-002, TAG-003
 [4] AFTER snapshot : TAG-001, TAG-003
-[OK] Checkout CabinetAccess closed: 95bc5479-d748-418a-981a-b24359cb9765
+[OK] Checkout CabinetAccess closed: ce3416a3-d407-46f4-bdeb-737cfb293b08
 [OK] TAG-002 assigned to operator as ACTIVE
 [OK] End-of-day check detects 1 pending assignment before exchange
 [5] Opening second CabinetAccess for tool exchange
 [6] BEFORE snapshot: TAG-001, TAG-003, TAG-004
 [7] AFTER snapshot : TAG-001, TAG-002, TAG-003
-[OK] Exchange CabinetAccess closed: 0c987179-7cc3-41dd-8027-ea6499ed281b
+[OK] Exchange CabinetAccess closed: 307701a3-5335-4029-b0e5-4f58bd803264
 [OK] TAG-002 marked as RETURNED
 [OK] TAG-004 assigned to operator as ACTIVE
 [OK] End-of-day check now detects TAG-004 as the pending assignment
 [8] Opening third CabinetAccess for final return
 [9] BEFORE snapshot: TAG-001, TAG-002, TAG-003
 [10] AFTER snapshot : TAG-001, TAG-002, TAG-003, TAG-004
-[OK] Final return CabinetAccess closed: 92f1b76c-97cc-4c96-bdec-07be7a25f350
+[OK] Final return CabinetAccess closed: 5a569ae2-75c0-4045-9e35-8e8abea8d2a1
 [OK] TAG-004 marked as RETURNED
 [11] Running final end-of-day-check
 [OK] No pending assignments

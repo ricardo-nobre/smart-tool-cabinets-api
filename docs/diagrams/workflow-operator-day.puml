@@ -1,39 +1,42 @@
 @startuml
 |Operador|
 start
-repeat
-:Autenticar-se no armário;
-|Sistema|
-:Abrir armário;
-:Snapshot BEFORE;
-|Operador|
-:Retirar/devolver ferramentas;
-|Sistema|
-:Snapshot AFTER;
-:Calcular delta;
-:Atualizar ToolAssignment (devolveu ou não devolveu);
-:Fechar armário;
-repeat while (Vai a outro armário?) is (sim)
+:Autenticar no armário;
 
 |Sistema|
-:Validação ao fim do dia;
-if (Tem pendências?) then (não)
-  :Operador apto para sair;
-  stop
-else (sim)
-  |Supervisor|
-  :Investigar pendências;
-  :Classificar causa humana (não inferida pelo sistema);
-  :Registar reasonCode + reportText;
-  |Sistema|
-  :Marcar ToolAssignments abrangidos como RESOLVED;
-  :Registar AuditLog da decisão;
-  :Executar end-of-day-check novamente;
-  if (Restam pendências?) then (não)
-    :Autorizar saída operacional;
-  else (sim)
-    :Manter pendência operacional;
-  endif
-  stop
+:Criar CabinetAccess;
+:Registar snapshot BEFORE;
+
+|Operador|
+:Retirar ou devolver ferramentas;
+
+|Sistema|
+:Registar snapshot AFTER;
+:Calcular delta;
+
+if (Ferramenta retirada?) then (sim)
+  :Criar ToolAssignment ACTIVE;
 endif
+
+if (Ferramenta devolvida ao armário de origem?) then (sim)
+  :Marcar ToolAssignment RETURNED;
+elseif (Ferramenta detetada noutro armário?) then (sim)
+  :Marcar ToolAssignment PENDING_REVIEW;
+endif
+
+:Fechar CabinetAccess;
+:Executar end-of-day-check quando solicitado;
+
+if (Restam ACTIVE ou PENDING_REVIEW?) then (sim)
+  :allowExit=false;
+  |Supervisor|
+  :Criar SupervisorResolution para uma assignment;
+  |Sistema|
+  :Marcar essa assignment como RESOLVED;
+  :Num novo end-of-day-check,\nallowExit é recalculado;
+else (não)
+  :allowExit=true;
+endif
+
+stop
 @enduml

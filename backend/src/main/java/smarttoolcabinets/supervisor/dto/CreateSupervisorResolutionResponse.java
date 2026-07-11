@@ -1,7 +1,6 @@
 package smarttoolcabinets.supervisor.dto;
 
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.UUID;
 
 public record CreateSupervisorResolutionResponse(
@@ -11,6 +10,6 @@ public record CreateSupervisorResolutionResponse(
         OffsetDateTime decisionAt,
         String reasonCode,
         String reportText,
-        List<UUID> resolvedAssignmentIds
+        UUID resolvedAssignmentId
 ) {
 }

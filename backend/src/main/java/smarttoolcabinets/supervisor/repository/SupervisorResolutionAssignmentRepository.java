@@ -5,6 +5,7 @@ import smarttoolcabinets.supervisor.domain.SupervisorResolutionAssignment;
 import smarttoolcabinets.supervisor.domain.SupervisorResolutionAssignmentId;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -13,5 +14,8 @@ import java.util.UUID;
 public interface SupervisorResolutionAssignmentRepository extends JpaRepository<SupervisorResolutionAssignment, SupervisorResolutionAssignmentId> {
 
 	List<SupervisorResolutionAssignment> findByIdSupervisorResolutionId(UUID supervisorResolutionId);
-}
 
+	Optional<SupervisorResolutionAssignment> findByIdToolAssignmentId(UUID toolAssignmentId);
+
+	boolean existsByIdToolAssignmentId(UUID toolAssignmentId);
+}

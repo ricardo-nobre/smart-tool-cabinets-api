@@ -547,41 +547,41 @@ components:
 
     CreateSupervisorResolutionRequest:
       type: object
-      required: [operatorId, supervisorId, reasonCode, reportText, assignmentIds, decisionAt]
+      required: [operatorId, supervisorId, assignmentId, reasonCode, reportText, decisionAt]
       description: |
-        Decisão humana formal do supervisor.
-        O supervisor resolve assignments pendentes; allowExit é recalculado pelo end-of-day-check.
+        Decisão humana formal do supervisor para uma única ToolAssignment.
+        Apenas assignments em ACTIVE ou PENDING_REVIEW podem ser resolvidas.
+        allowExit é recalculado posteriormente pelo end-of-day-check.
       properties:
         operatorId: { type: string, format: uuid }
         supervisorId: { type: string, format: uuid }
-        reasonCode: { type: string }
+        assignmentId: { type: string, format: uuid }
+        reasonCode:
+          type: string
+          enum: [TOOL_LOST, TOOL_DAMAGED, RFID_FAILURE, MANUAL_VERIFICATION, OTHER]
         reportText: { type: string }
         decisionAt: { type: string, format: date-time }
-        assignmentIds:
-          type: array
-          minItems: 1
-          items: { type: string, format: uuid }
       example:
         operatorId: 00000000-0000-0000-0000-000000000201
         supervisorId: 00000000-0000-0000-0000-000000000301
-        reasonCode: TOOL_NOT_RETURNED
-        reportText: Ferramenta não devolvida no final do turno; ocorrência registada para tratamento interno.
+        assignmentId: 00000000-0000-0000-0000-000000000902
+        reasonCode: TOOL_DAMAGED
+        reportText: Ferramenta encontrada danificada e retirada de serviço.
         decisionAt: 2026-06-25T18:10:00Z
-        assignmentIds: [00000000-0000-0000-0000-000000000902]
 
     CreateSupervisorResolutionResponse:
       type: object
-      required: [resolutionId, operatorId, supervisorId, decisionAt, reasonCode, reportText, resolvedAssignmentIds]
+      required: [resolutionId, operatorId, supervisorId, decisionAt, reasonCode, reportText, resolvedAssignmentId]
       properties:
         resolutionId: { type: string, format: uuid }
         operatorId: { type: string, format: uuid }
         supervisorId: { type: string, format: uuid }
         decisionAt: { type: string, format: date-time }
-        reasonCode: { type: string }
+        reasonCode:
+          type: string
+          enum: [TOOL_LOST, TOOL_DAMAGED, RFID_FAILURE, MANUAL_VERIFICATION, OTHER]
         reportText: { type: string }
-        resolvedAssignmentIds:
-          type: array
-          items: { type: string, format: uuid }
+        resolvedAssignmentId: { type: string, format: uuid }
 
     SupervisorResolutionListResponse:
       type: object
@@ -590,5 +590,4 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CreateSupervisorResolutionResponse'
-
 

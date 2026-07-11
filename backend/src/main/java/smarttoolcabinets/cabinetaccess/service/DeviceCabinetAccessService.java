@@ -18,6 +18,8 @@ import smarttoolcabinets.cabinetaccess.dto.CloseCabinetAccessResponse;
 import smarttoolcabinets.cabinetaccess.dto.OpenCabinetAccessRequest;
 import smarttoolcabinets.cabinetaccess.dto.OpenCabinetAccessResponse;
 import smarttoolcabinets.cabinetaccess.repository.CabinetAccessRepository;
+import smarttoolcabinets.tool.domain.Tool;
+import smarttoolcabinets.tool.repository.ToolRepository;
 import smarttoolcabinets.toolassignment.domain.ToolAssignment;
 import smarttoolcabinets.toolassignment.domain.ToolAssignmentStatus;
 import smarttoolcabinets.toolassignment.repository.ToolAssignmentRepository;
@@ -45,6 +47,7 @@ public class DeviceCabinetAccessService {
     private final InventorySnapshotItemRepository inventorySnapshotItemRepository;
     private final ToolAssignmentRepository toolAssignmentRepository;
     private final InventoryDeltaService inventoryDeltaService;
+    private final ToolRepository toolRepository;
 
     public DeviceCabinetAccessService(
             CabinetAccessRepository cabinetAccessRepository,
@@ -54,7 +57,8 @@ public class DeviceCabinetAccessService {
             InventorySnapshotRepository inventorySnapshotRepository,
             InventorySnapshotItemRepository inventorySnapshotItemRepository,
             ToolAssignmentRepository toolAssignmentRepository,
-            InventoryDeltaService inventoryDeltaService
+            InventoryDeltaService inventoryDeltaService,
+            ToolRepository toolRepository
     ) {
         this.cabinetAccessRepository = cabinetAccessRepository;
         this.cabinetRepository = cabinetRepository;
@@ -64,6 +68,7 @@ public class DeviceCabinetAccessService {
         this.inventorySnapshotItemRepository = inventorySnapshotItemRepository;
         this.toolAssignmentRepository = toolAssignmentRepository;
         this.inventoryDeltaService = inventoryDeltaService;
+        this.toolRepository = toolRepository;
     }
 
     /**
@@ -162,7 +167,13 @@ public class DeviceCabinetAccessService {
             var delta = inventoryDeltaService.calculate(beforeTools, afterTools);
 
             for (UUID toolId : delta.removed()) {
-                if (toolAssignmentRepository.findByToolIdAndStatus(toolId, ToolAssignmentStatus.ACTIVE).isPresent()) {
+                if (toolAssignmentRepository.existsByToolIdAndStatusIn(toolId, ToolAssignmentStatus.OPEN)) {
+                    discrepancyFlag = true;
+                    continue;
+                }
+                Tool tool = toolRepository.findById(toolId)
+                        .orElseThrow(() -> new IllegalStateException("tool not found: " + toolId));
+                if (!tool.isActive()) {
                     discrepancyFlag = true;
                     continue;
                 }
@@ -189,7 +200,7 @@ public class DeviceCabinetAccessService {
                     assignment.markReturned(s.getCabinetId(), s.getId(), OffsetDateTime.now());
                     assignmentsReturnedCount++;
                 } else {
-                    assignment.markPendingReview();
+                    assignment.markPendingReview(s.getCabinetId(), s.getId(), OffsetDateTime.now());
                     discrepancyFlag = true;
                 }
                 toolAssignmentRepository.save(assignment);
@@ -238,5 +249,4 @@ public class DeviceCabinetAccessService {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }
-
 

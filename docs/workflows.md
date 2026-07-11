@@ -1,50 +1,44 @@
-# Workflows e casos de uso (API-first)
+# Workflows
 
-Este ficheiro descreve apenas o comportamento necessário para provar a API no relatório intermédio.
+## Fluxo Operacional
 
-## Atores
-- Operador
-- Supervisor
+1. O armário autentica-se.
+2. O operador autentica-se por PIN ou NFC.
+3. O backend cria um `CabinetAccess`.
+4. O armário envia snapshot `BEFORE`.
+5. O operador retira ou devolve ferramentas.
+6. O armário envia snapshot `AFTER`.
+7. O backend fecha o `CabinetAccess`, calcula o delta e atualiza `ToolAssignment`.
+8. O operador pode repetir o fluxo noutros armários.
 
-## Componentes técnicos
-- Armário inteligente (dispositivo)
-- API/backend
-- Base de dados
-- Auditoria
+## Retirada
 
-## Fluxo principal (fim-a-fim)
-1. Dispositivo autentica-se em `POST /api/device/auth`.
-2. Operador autentica-se em `POST /api/device/operator-auth`.
-3. Dispositivo abre acesso em `POST /api/device/cabinet-accesses`.
-4. Dispositivo envia snapshot `BEFORE` em `POST /api/device/cabinet-accesses/{cabinetAccessId}/snapshots`.
-5. Operador retira/devolve ferramentas.
-6. Dispositivo envia snapshot `AFTER` no mesmo endpoint.
-7. Dispositivo fecha acesso em `POST /api/device/cabinet-accesses/{cabinetAccessId}/close`.
-8. Backend calcula delta e atualiza `ToolAssignment`.
-9. Operador pode repetir o fluxo noutros armários durante o dia.
+`BEFORE - AFTER` cria assignments `ACTIVE`, desde que a ferramenta esteja ativa e não tenha outra assignment aberta.
 
-## End-of-day check
-1. API avalia estado final da custódia em `GET /api/operators/{operatorId}/end-of-day-check`.
-2. Se houver assignments em `ACTIVE` ou `PENDING_REVIEW`, `requireSupervisorReview = true` e `allowExit = false`.
-3. Supervisor regista resolução formal em `POST /api/supervisor/resolutions`.
-4. A resolução marca apenas as assignments abrangidas como `RESOLVED`.
-5. O `end-of-day-check` é executado novamente e recalcula `allowExit`.
+## Devolução
 
-## Regras de interpretação operacional
-- Devolução parcial durante o dia é comportamento normal.
-- O sistema atualiza custódia por operador com base em retirada e devolução (ou não devolução).
-- Dados de origem podem existir para rastreabilidade, sem serem a regra central do fluxo intermédio.
-- O sistema devolve estado operacional; não emite diagnóstico causal automático.
-- A causa é registada pelo supervisor com `reasonCode` e `reportText`.
+`AFTER - BEFORE` procura uma assignment `ACTIVE` da ferramenta:
 
-## Casos de uso essenciais
-- UC-01 Autenticar dispositivo.
-- UC-02 Autenticar operador.
-- UC-03 Abrir acesso ao armário (`CabinetAccess`).
-- UC-04 Registar snapshots `BEFORE`/`AFTER`.
-- UC-05 Fechar acesso e obter `operationalResult`.
-- UC-06 Consultar atribuições do operador.
-- UC-07 Validar fim do dia.
-- UC-08 Supervisor registar `reasonCode` + `reportText`.
-- UC-09 Sistema recalcular `allowExit` no `end-of-day-check`.
-- UC-10 Auditar operações relevantes.
+- se reaparecer no armário de origem, passa para `RETURNED`;
+- se reaparecer noutro armário, passa para `PENDING_REVIEW`;
+- se não existir assignment ativa, o close fecha com discrepância.
+
+## Fim do Dia
+
+O `end-of-day-check` não cria novas pendências. Ele apenas consulta assignments `ACTIVE` e `PENDING_REVIEW`.
+
+Sem pendências:
+
+- `pendingAssignmentsCount = 0`
+- `requireSupervisorReview = false`
+- `allowExit = true`
+
+Com pendências:
+
+- `pendingAssignmentsCount > 0`
+- `requireSupervisorReview = true`
+- `allowExit = false`
+
+## Supervisor
+
+Quando há pendências, o supervisor cria uma resolução para uma assignment específica. A resolução marca essa assignment como `RESOLVED`. Num novo `end-of-day-check`, `allowExit` é recalculado. Se restarem outras assignments pendentes, continua `false`.

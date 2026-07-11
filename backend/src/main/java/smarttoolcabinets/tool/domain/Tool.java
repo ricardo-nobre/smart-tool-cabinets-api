@@ -49,12 +49,24 @@ public class Tool {
         return id;
     }
 
+    public UUID getCabinetId() {
+        return cabinetId;
+    }
+
     public String getTagCode() {
         return tagCode;
     }
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void deactivate() {
+        this.active = false;
     }
 }
 

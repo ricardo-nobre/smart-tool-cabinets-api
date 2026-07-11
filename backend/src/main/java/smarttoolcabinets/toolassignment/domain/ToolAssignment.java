@@ -87,6 +87,10 @@ public class ToolAssignment {
         return originCabinetId;
     }
 
+    public UUID getOriginCabinetAccessId() {
+        return originCabinetAccessId;
+    }
+
     public OffsetDateTime getAssignedAt() {
         return assignedAt;
     }
@@ -99,6 +103,14 @@ public class ToolAssignment {
         return status;
     }
 
+    public UUID getReturnedToCabinetId() {
+        return returnedToCabinetId;
+    }
+
+    public UUID getReturnedViaCabinetAccessId() {
+        return returnedViaCabinetAccessId;
+    }
+
     public void markReturned(UUID returnedToCabinetId, UUID returnedViaCabinetAccessId, OffsetDateTime returnedAt) {
         this.returnedToCabinetId = returnedToCabinetId;
         this.returnedViaCabinetAccessId = returnedViaCabinetAccessId;
@@ -106,7 +118,10 @@ public class ToolAssignment {
         this.status = ToolAssignmentStatus.RETURNED;
     }
 
-    public void markPendingReview() {
+    public void markPendingReview(UUID detectedCabinetId, UUID detectedCabinetAccessId, OffsetDateTime detectedAt) {
+        this.returnedToCabinetId = detectedCabinetId;
+        this.returnedViaCabinetAccessId = detectedCabinetAccessId;
+        this.returnedAt = detectedAt;
         this.status = ToolAssignmentStatus.PENDING_REVIEW;
     }
 
@@ -114,4 +129,3 @@ public class ToolAssignment {
         this.status = ToolAssignmentStatus.RESOLVED;
     }
 }
-

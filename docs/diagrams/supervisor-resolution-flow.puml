@@ -1,22 +1,25 @@
 @startuml
 |Sistema|
 start
-:Detetar pendências/discrepâncias;
-:Notificar necessidade de supervisor;
+:Executar end-of-day-check;
+if (Existem ACTIVE ou PENDING_REVIEW?) then (sim)
+  :allowExit=false;
+  :requireSupervisorReview=true;
+else (não)
+  :allowExit=true;
+  stop
+endif
 
 |Supervisor|
-:Autenticar;
-:Consultar atribuições pendentes abrangidas;
-:Investigar o porquê das pendências/discrepâncias;
-:Selecionar reasonCode;
+:Analisar uma ToolAssignment pendente;
+:Escolher reasonCode;
 :Escrever reportText;
 
 |Sistema|
-:Persistir SupervisorResolution;
-:Associar ToolAssignments abrangidos;
-:Marcar ToolAssignments abrangidos como RESOLVED;
-:Registar AuditLog da decisão;
-:Recalcular allowExit no end-of-day-check;
-
+:Criar SupervisorResolution;
+:Associar exatamente uma ToolAssignment;
+:Marcar a ToolAssignment como RESOLVED;
+:Registar AuditLog;
+:Num novo end-of-day-check,\nrecalcular allowExit;
 stop
 @enduml

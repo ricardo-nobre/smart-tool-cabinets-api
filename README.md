@@ -2,7 +2,7 @@
 
 Backend API for an academic MVP about communication between smart tool cabinets and a central system.
 
-The demonstrable flow covers cabinet authentication, operator authentication, `CabinetAccess`, RFID snapshots, inventory delta, `ToolAssignment` custody and end-of-day validation.
+The demonstrable flow covers cabinet authentication, operator authentication, `CabinetAccess`, RFID snapshots, inventory delta, `ToolAssignment` custody, end-of-day validation and one-assignment supervisor resolution.
 
 ## Stack
 
